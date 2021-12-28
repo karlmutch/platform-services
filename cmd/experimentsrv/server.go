@@ -23,8 +23,8 @@ import (
 	"github.com/go-stack/stack"
 	"github.com/karlmutch/errors"
 
-	model "github.com/leaf-ai/platform-services/internal/experiment"
-	experiment "github.com/leaf-ai/platform-services/internal/gen/experimentsrv"
+	model "github.com/karlmutch/platform-services/internal/experiment"
+	experiment "github.com/karlmutch/platform-services/internal/gen/experimentsrv"
 )
 
 var (
@@ -42,7 +42,7 @@ type ExperimentServer struct {
 // email address.  The custom rule would appear as follows:
 //
 // function (user, context, callback) {
-//  context.accessToken["http://cognizant-ai.dev/user"] = user.email;
+//  context.accessToken["http://karlmutch.com/user"] = user.email;
 //  callback(null, user, context);
 // }
 //
@@ -57,7 +57,7 @@ func GetUserFromClaims(ctx context.Context) {
 			}
 
 			type CustomClaims struct {
-				Email string `json:"http://cognizant-ai.dev/user"`
+				Email string `json:"http://karlmutch.com/user"`
 				jwt.StandardClaims
 			}
 

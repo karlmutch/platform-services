@@ -33,10 +33,11 @@ spec:
       - name: downstream
         {{if .duat.awsecr}}
         image: {{.duat.awsecr}}/platform-services/{{.duat.module}}:{{.duat.version}}
-        {{else}}
-        image: localhost:5000/platform-services/{{.duat.module}}:{{.duat.version}}
-        {{end}}
         imagePullPolicy: Always
+        {{else}}
+        image: downstream:{{.duat.version}}
+        imagePullPolicy: Never
+        {{end}}
         ports:
         - containerPort: 30001
           name: grpc-downstream

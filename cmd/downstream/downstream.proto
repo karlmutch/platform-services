@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package dev.cognizant_ai.downstream;
+package dev.karlmutch.downstream;
 option go_package = "platform-services/genproto/platform-services/downstream/v1;downstream";
 
 import "google/protobuf/timestamp.proto";

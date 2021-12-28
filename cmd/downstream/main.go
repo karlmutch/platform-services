@@ -20,8 +20,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
-	"github.com/leaf-ai/platform-services/internal/version"
+	"github.com/karlmutch/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/version"
 
 	"github.com/karlmutch/envflag"
 

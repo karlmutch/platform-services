@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
-go get github.com/karlmutch/duat
-go get github.com/karlmutch/duat/cmd/semver
+go install github.com/karlmutch/duat/cmd/semver@0.16.0
+
 version=`$GOPATH/bin/semver`
 
 set +e

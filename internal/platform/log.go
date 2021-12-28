@@ -6,7 +6,7 @@ package platform
 import (
 	"os"
 
-	"github.com/mgutz/logxi"
+	logxi "github.com/karlmutch/logxi/v1"
 )
 
 var (

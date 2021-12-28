@@ -9,7 +9,7 @@ package main
 // Testing this service can be done by starting the binary and then using commands
 // such as:
 //
-// bins/opt/grpc_cli call localhost:3000 dev.cognizant-ai.EchoService.Echo "message: 'test'"
+// bins/opt/grpc_cli call localhost:3000 dev.karlmutch.EchoService.Echo "message: 'test'"
 // connecting to localhost:3000
 // message: "test"
 // date_time {
@@ -20,13 +20,13 @@ package main
 //
 // Using the cli tool more detailed information can be uncovered, for example:
 //
-// bins/opt/grpc_cli ls localhost:3000 dev.cognizant-ai.EchoService Echo
+// bins/opt/grpc_cli ls localhost:3000 dev.karlmutch.EchoService Echo
 // Echo
 //
-// bins/opt/grpc_cli ls localhost:3000 dev.cognizant-ai.EchoService/Echo --l
-//   rpc Echo(dev.cognizant-ai.EchoRequest) returns (dev.cognizant-ai.EchoResponse) {}
+// bins/opt/grpc_cli ls localhost:3000 dev.karlmutch.EchoService/Echo --l
+//   rpc Echo(dev.karlmutch.EchoRequest) returns (dev.karlmutch.EchoResponse) {}
 //
-// bins/opt/grpc_cli type localhost:3000 dev.cognizant-ai.EchoResponse
+// bins/opt/grpc_cli type localhost:3000 dev.karlmutch.EchoResponse
 // message EchoResponse {
 //  string message = 1[json_name = "message"];
 //    .google.protobuf.Timestamp date_time = 2[json_name = "dateTime"];
@@ -50,12 +50,12 @@ package main
 //
 // To call the methods within the API you will need to first fetch a security token for the API and then use the grpc CLI command to exercise the API for example:
 //
-// export AUTH0_DOMAIN=cognizant-ai.auth0.com
-// export AUTH0_TOKEN=$(curl -s --request POST --url 'https://cognizant-ai.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.cognizant-ai.dev/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
+// export AUTH0_DOMAIN=karlmutch.auth0.com
+// export AUTH0_TOKEN=$(curl -s --request POST --url 'https://karlmutch.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.karlmutch.com/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
 //
-// grpc_cli ls localhost:30001 dev.cognizant-ai.experiment.Service -l
-// grpc_cli type localhost:30001 dev.cognizant-ai.experiment.GetRequest -l
-// grpc_cli call localhost:30001 dev.cognizant-ai.experiment.Service.Get "id: 't'"  --metadata authorization:"Bearer $AUTH0_TOKEN"
+// grpc_cli ls localhost:30001 dev.karlmutch.experiment.Service -l
+// grpc_cli type localhost:30001 dev.karlmutch.experiment.GetRequest -l
+// grpc_cli call localhost:30001 dev.karlmutch.experiment.Service.Get "id: 't'"  --metadata authorization:"Bearer $AUTH0_TOKEN"
 //
 
 import (
@@ -68,8 +68,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
-	"github.com/leaf-ai/platform-services/internal/version"
+	"github.com/karlmutch/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/version"
 
 	zipkin "github.com/openzipkin/zipkin-go"
 	zipkinHTTP "github.com/openzipkin/zipkin-go/reporter/http"
@@ -79,7 +79,7 @@ import (
 	"github.com/go-stack/stack"
 	"github.com/karlmutch/errors"
 
-	"github.com/leaf-ai/platform-services/internal/experiment"
+	"github.com/karlmutch/platform-services/internal/experiment"
 )
 
 const serviceName = "experimentsrv"

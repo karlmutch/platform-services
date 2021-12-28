@@ -22,3 +22,5 @@ vendor/github.com/leaf-ai/platform-services/internal/gen
 letsencrypt
 minica
 .envrc
+spdx-output
+bom.xml

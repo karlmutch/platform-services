@@ -9,7 +9,7 @@ package main
 // Testing this service can be done by starting the binary and then using commands
 // such as:
 //
-// bins/opt/grpc_cli call localhost:3000 dev.cognizant-ai.echo.EchoService.Echo "message: 'test'"
+// bins/opt/grpc_cli call localhost:3000 dev.karlmutch.echo.EchoService.Echo "message: 'test'"
 // connecting to localhost:3000
 // message: "test"
 // date_time {
@@ -20,13 +20,13 @@ package main
 //
 // Using the cli tool more detailed information can be uncovered, for example:
 //
-// bins/opt/grpc_cli ls localhost:3000 dev.cognizant-ai.echo.EchoService Echo
+// bins/opt/grpc_cli ls localhost:3000 dev.karlmutch.echo.EchoService Echo
 // Echo
 //
-// bins/opt/grpc_cli ls localhost:3000 dev.cognizant-ai.echo.EchoService/Echo --l
-//   rpc Echo(dev.cognizant-ai.echo.EchoRequest) returns (dev.cognizant-ai.echo.EchoResponse) {}
+// bins/opt/grpc_cli ls localhost:3000 dev.karlmutch.echo.EchoService/Echo --l
+//   rpc Echo(dev.karlmutch.echo.EchoRequest) returns (dev.karlmutch.echo.EchoResponse) {}
 //
-// bins/opt/grpc_cli type localhost:3000 dev.cognizant-ai.echo.EchoResponse
+// bins/opt/grpc_cli type localhost:3000 dev.karlmutch.echo.EchoResponse
 // message EchoResponse {
 //  string message = 1[json_name = "message"];
 //    .google.protobuf.Timestamp date_time = 2[json_name = "dateTime"];
@@ -55,8 +55,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
-	"github.com/leaf-ai/platform-services/internal/version"
+	"github.com/karlmutch/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/version"
 
 	"github.com/karlmutch/envflag"
 

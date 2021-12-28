@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/platform"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-stack/stack"
@@ -17,7 +17,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	downstream "github.com/leaf-ai/platform-services/internal/gen/downstream"
+	downstream "github.com/karlmutch/platform-services/internal/gen/downstream"
 )
 
 var (

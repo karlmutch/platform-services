@@ -13,7 +13,7 @@ import (
 
 	zipkin "github.com/openzipkin/zipkin-go"
 
-	downstream "github.com/leaf-ai/platform-services/internal/gen/downstream"
+	downstream "github.com/karlmutch/platform-services/internal/gen/downstream"
 )
 
 var (

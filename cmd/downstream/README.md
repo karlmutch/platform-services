@@ -8,7 +8,7 @@ The server offers a gRPC interface accessed using a machine-to-machine or human-
 
 Before starting you should install several build and deployment tools that will be useful for managing the service configuration file.
 
-<pre><code><b>wget -O $GOPATH/bin/stencil https://github.com/karlmutch/duat/releases/download/0.4.0/stencil
+<pre><code><b>wget -O $GOPATH/bin/stencil https://github.com/karlmutch/duat/releases/download/0.16.0/stencil
 chmod +x $GOPATH/bin/stencil
 </b></code></pre>
 
@@ -27,7 +27,7 @@ To deploy the service three commands will be used stencil (a SDLC aware templati
 
 When version controlled containers are being used with ECS or another docker registry the semver can be used to extract a git cloned repository that has the version string embeeded inside the README.md or another file of your choice, and then use this with your application deployment yaml specification, as follows:
 
-<pre><code><b>cd ~/project/src/github.com/leaf-ai/platform-services/cmd/downstream</b>
+<pre><code><b>cd ~/project/src/github.com/karlmutch/platform-services/cmd/downstream</b>
 <b>kubectl apply -f <(istioctl kube-inject -f <(stencil < downstream.yaml))
 </b></code></pre>
 
@@ -45,5 +45,5 @@ Two pieces of information are needed in order to make use of the service:
 
 First, you will need the ingress iendpoint for your cluster.  The following command sets an environment variable that you will be using as the CLUSTER_INGRESS environment variable across all of the examples within this guide.
 
-<pre><code><b>grpc_cli call $CLUSTER_INGRESS dev.cognizant-ai.experiment.Service.Create "experiment: {uid: 't', name: 'name', description: 'description'}"  --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
+<pre><code><b>grpc_cli call $CLUSTER_INGRESS dev.karlmutch.experiment.Service.Create "experiment: {uid: 't', name: 'name', description: 'description'}"  --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
 </pre></code>

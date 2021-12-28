@@ -6,5 +6,5 @@ RUN adduser --system app --disabled-password
 USER app
 
 WORKDIR /home/app
-COPY bin/restpoc .
+COPY bin/restpoc restpoc
 CMD ["./restpoc"]

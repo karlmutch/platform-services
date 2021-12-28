@@ -1,5 +1,5 @@
 #!/bin/bash -xe
-go get github.com/karlmutch/duat/cmd/semver
+
 mkdir -p internal/gen
 
 # Code generation must be done first to allow vendoring and modules to play nice
@@ -20,6 +20,10 @@ for dir in cmd/*/ ; do
         exit $exit_code
     fi
 done
+
+go mod tidy
+
+go install github.com/karlmutch/duat/cmd/semver@0.16.0
 
 for dir in cmd/*/ ; do
     base="${dir%%\/}"

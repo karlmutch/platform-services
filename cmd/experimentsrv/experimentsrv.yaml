@@ -10,7 +10,7 @@ spec:
   http:
   - match:
     - uri:
-        prefix: "/dev.cognizant_ai.experiment.Service/"
+        prefix: "/dev.karlmutch.experiment.Service/"
     - uri:
        prefix: "/grpc.reflection.v1alpha.ServerReflection/"
     route:
@@ -62,10 +62,11 @@ spec:
       - name: experiment
         {{if .duat.awsecr}}
         image: {{.duat.awsecr}}/platform-services/{{.duat.module}}:{{.duat.version}}
-        {{else}}
-        image: localhost:5000/platform-services/{{.duat.module}}:{{.duat.version}}
-        {{end}}
         imagePullPolicy: Always
+        {{else}}
+        image: experimentsrv:{{.duat.version}}
+        imagePullPolicy: Never
+        {{end}}
         resources:
           requests:
             memory: "2048Mi"

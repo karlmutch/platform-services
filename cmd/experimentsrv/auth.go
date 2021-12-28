@@ -16,7 +16,7 @@ import (
 	"github.com/go-stack/stack"
 	"github.com/karlmutch/errors"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/platform"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -32,8 +32,8 @@ import (
 var (
 	auth0Enable   = flag.Bool("auth0-enable", true, "This can be used to enable auth checking when running in a mesh for example")
 	auth0Scope    = flag.String("auth0-scope", "all:experiments", "The scope that must be claimed in order to be permitted access to the service")
-	auth0Audience = flag.String("auth0-audience", "http://api.cognizant-ai.dev/experimentsrv", "The audience URL raw token string received from an invocation of {auth0-domain}/oauth/token}")
-	auth0Domain   = flag.String("auth0-domain", "cognizant-ai.auth0.com", "The domain assigned to the server API by Auth0")
+	auth0Audience = flag.String("auth0-audience", "http://api.karlmutch.com/experimentsrv", "The audience URL raw token string received from an invocation of {auth0-domain}/oauth/token}")
+	auth0Domain   = flag.String("auth0-domain", "karlmutch.auth0.com", "The domain assigned to the server API by Auth0")
 	jwksCache     = &jwksState{
 		ok: false,
 	}

@@ -14,9 +14,9 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	model "github.com/leaf-ai/platform-services/internal/experiment"
-	grpc "github.com/leaf-ai/platform-services/internal/gen/experimentsrv"
-	"github.com/leaf-ai/platform-services/internal/platform"
+	model "github.com/karlmutch/platform-services/internal/experiment"
+	grpc "github.com/karlmutch/platform-services/internal/gen/experimentsrv"
+	"github.com/karlmutch/platform-services/internal/platform"
 
 	"github.com/go-stack/stack"
 	"github.com/karlmutch/errors"

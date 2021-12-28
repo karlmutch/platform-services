@@ -1,17 +1,17 @@
 #!/bin/bash -e
 [ -z "$USER" ] && echo "env variable USER must be set" && exit 1;
-docker build -t platform-services:latest --build-arg USER=$USER --build-arg USER_ID=`id -u $USER` --build-arg USER_GROUP_ID=`id -g $USER` .
+nerdctl build -t platform-services:latest --build-arg USER=$USER --build-arg USER_ID=`id -u $USER` --build-arg USER_GROUP_ID=`id -g $USER` .
 docker_name=`petname`
-docker run --name $docker_name -e GITHUB_TOKEN=$GITHUB_TOKEN -v $GOPATH:/project platform-services 
-exit_code=`docker inspect $docker_name --format='{{.State.ExitCode}}'`
+nerdctl run --name $docker_name -e GITHUB_TOKEN=$GITHUB_TOKEN -v $GOPATH:/project platform-services 
+exit_code=`nerdctl inspect $docker_name --format='{{.State.ExitCode}}'`
 if [ $exit_code -ne 0 ]; then
     echo "Error" $exit_code
     exit $exit_code
 fi
 
-echo "Build Done" ; docker container prune -f
+echo "Build Done" ;
 
-go get github.com/karlmutch/duat/cmd/semver
+go install github.com/karlmutch/duat/cmd/semver@0.16.0
 version=`$GOPATH/bin/semver`
 
 for dir in cmd/*/ ; do
@@ -24,7 +24,7 @@ for dir in cmd/*/ ; do
         continue
     fi
     cd $dir
-    docker build -t $base:$version .
+    nerdctl build --namespace k8s.io -t $base:$version .
     cd -
 done
 

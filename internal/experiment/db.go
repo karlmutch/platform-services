@@ -43,7 +43,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 
-	grpc "github.com/leaf-ai/platform-services/internal/gen/experimentsrv"
+	grpc "github.com/karlmutch/platform-services/internal/gen/experimentsrv"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes"
@@ -366,7 +366,7 @@ func initDB(url string, user string) (err errors.Error) {
 		// shell issues in the salt startup try a hard coded but
 		// well known location
 		if _, errGo := os.Stat(pgPassFile); os.IsNotExist(errGo) {
-			pgPassFile = "/opt/cognizant-ai/.pgpass"
+			pgPassFile = "/opt/karlmutch/.pgpass"
 		}
 	}
 

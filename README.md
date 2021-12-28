@@ -1,25 +1,23 @@
 # platform-services
-A public PoC with functioning services using a simple Istio Mesh running on K8s
+A public PoC with functioning services using a simple Istio Mesh running on Kubernetes
 
-Version : <repo-version>0.9.0-master-aaaagqrfhew</repo-version>
+Version : <repo-version>0.9.0-main-aaaagsysdkp</repo-version>
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/leaf-ai/platform-services/blob/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/leaf-ai/platform-services)](https://goreportcard.com/report/leaf-ai/platform-services)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/karlmutch/platform-services/blob/master/LICENSE) [![Go Report Card](https://goreportcard.com/badge/karlmutch/platform-services)](https://goreportcard.com/report/karlmutch/platform-services)
 
-This project is intended as a sand-box for experimenting with Istio and some example services in a similiar manner to what is used by the Cognizant Evolutionary AI services.  It also provides a good way of exposing and testing out non-proprietary platform functions while collaborating with other parties such as vendors and customers.
+This project is intended as a sand-box for experimenting with Istio and some example services using robust SaaS services for security and Observability.  It also provides a good way of packaging and testing out non-proprietary platform functions while collaborating with other parties such as vendors and customers.
 
-Because this project is intended to mirror production examples of services deploy it requires that the user has an account and a registered internet domain name.  A service such as domains.google.com, or cloudflare is a good start.  Your DNS registered host will be used to issue certificates on your behalf to secure the public connections that are exposed by services to the internet, and more specifically to secure the username and password based access exposed by the service mesh.
+Because this project is intended to mirror production examples of services deploy it requires that the user has an account and a registered internet domain name.  A service such as domains.google.com, or cloudflare are good places to start.  Your DNS registered host will be used to issue certificates on your behalf to secure the public connections that are exposed by services to the internet, and more specifically to secure the username and password based access exposed by the service mesh.
 
 # Purpose
 
-This proof of concept (PoC) implementation is intended as a means by which the LEAF team can experiment with features of Service Mesh, PaaS, and SaaS platforms provided by third parties.  This project serves as a way of exercising non cognizant services so that code can be openly shared while testing external services and technologies, and for support in relation to external open source offerings in a public support context.
+This proof of concept (PoC) implementation is intended as a means by which commercial teams can experiment with features of Service Mesh, PaaS, and SaaS platforms provided by third parties.  This project serves as a way of exercising services so that code can be openly shared while testing external services and technologies, and for support in relation to external open source offerings in a public support context.
 
 In its current form the PoC is used to deploy two main services, an experiment service and a downstream service. These services are provisioned with a gRPC API and leverage an Authorizationm Athentication, and Accounting (AAA) capability and an Observability platform integration to services offered by thrid parties.
 
-This project is intended as a sand-box for experimenting with Istio and some of the services we use in our Evolutionary AI services.  It also provides a good way of exposing and testing out non-proprietary platform functions with other parties such as vendors and customers.
-
 # Installation
 
-These instructions were used with Kubernetes 1.19.x, and Istio 1.9.1.
+These instructions were used with Kubernetes 1.22.x, and Istio 1.12.1
 
 ## Development and Building from source
 
@@ -28,190 +26,128 @@ Clone the repository using the following instructions when this is part of a lar
 cd ~/project
 export GOPATH=`pwd`
 export PATH=$GOPATH/bin:$PATH
-mkdir -p src/github.com/leaf-ai
-cd src/github.com/leaf-ai
-git clone https://github.com/leaf-ai/platform-services
+mkdir -p src/github.com/karlmutch
+cd src/github.com/karlmutch
+git clone https://github.com/karlmutch/platform-services
 cd platform-services
 </b></code></pre>
 
-To boostrap development you will need a copy of Go and the go dependency tools available.  Builds do not need this general however for our purposes we might want to change dependency versions so we should install go and the dep tool, along with several utilities needed when deploying using templates.
+To boostrap development you will need a copy of Go 1.17+. Go installation instructions can be found at, https://golang.org/doc/install.
 
-Go installation instructions can be found at, https://golang.org/doc/install.
+# Build environment
 
-Now download any dependencies, once, into our development environment.
+Builds of the PoC software are intended to be done using Rancher Desktop with a Kubernetes hosted buildkit instance.
 
-<pre><code><b>
-go get github.com/karlmutch/petname
-go mod vendor
-go get github.com/karlmutch/duat/cmd/semver
-go get github.com/karlmutch/duat/cmd/github-release
-go get github.com/karlmutch/duat/cmd/stencil
-go get github.com/karlmutch/petname/cmd/petname
-</b></code></pre>
+## Rancher Desktop (rancher)
+
+Rancher Desktop will install a fully featured Kubernetes distribution and CLI tools include, nerdctl (container image wrangling), kubectl, trivy (image scanning), helm and a docker CLI.  Rancher Desktop can be deployed for Windows Services for Linux 2, Max OSX, LInux and Arch.
+
+Instructions for installation of rancher can be found at https://rancherdesktop.io/.
+
+Rancher will automatically deploy Kubernetes for you and update your kubectl configuration file so that you can immediately access the cluster.
 
 ## Running the build using the container
 
-Creating a build container to isolate the build into a versioned environment
+Creating a build container to isolate the build into a versioned environment.  nerdctl will use buildkit which rancher installs when deployed.
 
-<pre><code><b>docker build -t platform-services:latest --build-arg USER=$USER --build-arg USER_ID=`id -u $USER` --build-arg USER_GROUP_ID=`id -g $USER` .
+<pre><code><b>nerdctl build -t platform-services:latest --build-arg USER=$USER --build-arg USER_ID=`id -u $USER` --build-arg USER_GROUP_ID=`id -g $USER` .
 </b></code></pre>
 
-Prior to doing the build a GitHub OAUTH token needs to be defined within your environment.  Use the github admin pages for your account to generate a token, in Travis builds the token is probably already defined by the Travis service.
-<pre><code><b>docker run -e GITHUB_TOKEN=$GITHUB_TOKEN -v $GOPATH:/project platform-services ; echo "Done" ; docker container prune -f</b>
+Prior to doing the build a GitHub OAUTH token needs to be defined within your environment if you wish to release the build artifacts.  Use the github admin pages for your account to generate a token.
+<pre><code><b>nerdctl run -e GITHUB_TOKEN=$GITHUB_TOKEN -v $GOPATH:/project platform-services ; echo "Done" ; docker container prune -f</b>
 </code></pre>
 
-A combined build script is provided 'platform-services/build.sh' to allow all stages of the build including producing docker images to be run together.
+A combined build script is provided 'platform-services/build.sh' to allow all stages of the build including producing container images using nerdctl in order that rancher desktop has access to them.
 
-# Deployment
 
-These deployment instructions are intended for use with the Ubuntu 18.04 LTS distribution.
+Download development workflow dependencies into your development environment.
+
+<pre><code><b>
+go install github.com/karlmutch/duat/cmd/semver@0.16.0
+go install github.com/karlmutch/duat/cmd/github-release@0.16.0
+go install github.com/karlmutch/duat/cmd/stencil@0.16.0
+go install github.com/karlmutch/duat/cmd/license-detector@0.16.0
+go install github.com/karlmutch/petname/cmd/petname@latest
+</b></code></pre>
+
+## Software Bill of Materials
+
+The go compiler tools can be used to produce a simple list of all dependencies within this project without explicit licensing information using the following command:
+
+<pre><code><b>
+go list -json --mod=readonly ./...
+</b></code></pre>
+
+A Software Bill Of Materials can be generated using spdx project tooling as follows:
+
+<pre><code><b>
+mkdir spdx-output
+
+# The following command will print a short summary of the types of licenses detected and the highest confidence for each type.
+license-detector -r -s -o spdx-output/summary.rpt
+
+license-detector -r -o spdx-output/full.rpt
+
+</b></code></pre>
+
+The license-detector tool uses fuzzy license matching to deduce the license being used.
+
+If cyclonedx is being used as an alternative to SPDX then the cycleonedx-gomod tooling can be used to generate CycloneDX compliant files for use with dependency tracker and TeamCity like tools as follows:
+
+<pre><code><b>
+go install github.com/CycloneDX/cyclonedx-gomod@latest
+cyclonedx-gomod mod -output bom.xml -assert-licenses -licenses
+</b></code></pre>
+
+The dependency tracker API and service can be used with the following commands:
+
+</b></code></pre>
+go install github.com/ozonru/dtrack-audit/cmd/dtrack-audit@latest
+</b></code></pre>
+
+
+If SPDX is being used then the following tool uses attestations to generate the license report but these are not common and so the information is very patchy and not as useful.
+
+<pre><code><b>
+nerdctl run -v $GOPATH:/repository -v "$(pwd)/spdx-output:/out" spdx/spdx-sbom-generator -p /repository/src/github.com/karlmutch/platform-services -o /out</b>
+WARN[0000] kernel support for cgroup blkio weight missing, weight discarded
+INFO[2021-12-21T22:15:43Z] Starting to generate SPDX ...
+INFO[2021-12-21T22:15:46Z] Running generator for Module Manager: `go-mod` with output `/out/bom-go-mod.spdx`
+INFO[2021-12-21T22:15:46Z] Current Language Version go version go1.16.5 linux/amd64
+INFO[2021-12-21T22:15:50Z] Command completed successful for below package managers
+INFO[2021-12-21T22:15:50Z] Plugin go-mod generated output at /out/bom-go-mod.spdx
+</code></pre>
+
+# Deployment Environment
+
+These deployment instructions are intended for use with the Ubuntu 20.04 LTS distribution.
 
 The following instructions make use of the stencil tool for templating configuration files.
 
-This major section describes two basic alternatives for deployment, AWS kops, and locally hosted KinD (kubernetes in docker).  Other Kubernetes distribution and deployment models will work but are not explicitly described here.
+This major section describes two basic alternatives for deployment locally hosted Rancher Desktop, and AWS EKS.  Other Kubernetes distribution and deployment models should work but are not explicitly described here.
 
-## Verify Docker Version
+## Rancher Desktop (rancher)
 
-Docker for Ubuntu can be retrieved from the snap store using the following:
-<pre><code><b>sudo snap install docker
-docker --version</b>
-Docker version 19.03.13, build cd8016b6bc
-</code></pre>
-You should have a similar or newer version.
+The development environment makes use of Rancher Desktop so this step will have been already been completed if you have been performing builds.
 
-snap based docker installation is done to ensure that a platform specific deployment is made using the Ubuntu distribution for portability reasons.
+Rancher Desktop will install a fully featured Kubernetes distribution and CLI tools include, nerdctl (container image wrangling), kubectl, trivy (image scanning), helm and a docker CLI.  Rancher Desktop can be deployed for Windows Services for Linux 2, Max OSX, LInux and Arch.
 
-## Arkade Portable DevOps marketplace
+Instructions for installation of rancher can be found at https://rancherdesktop.io/.
 
-arkade provides a means for installation of Kubernetes and related software packages with a single command.  arkade is used throughout these instructions to ease the installation of several utilities and tools.
+Rancher will automatically deploy Kubernetes for you and update your kubectl configuration file so that you can immediately access the cluster.
 
-```
-$ curl -sLS https://dl.get-arkade.dev | sudo sh
-x86_64
-x86_64
-Downloading package https://github.com/alexellis/arkade/releases/download/0.7.10/arkade as /tmp/arkade
-Download complete.
+## Installing AWS Kubernetes
 
-Running with sufficient permissions to attempt to move arkade to /usr/local/bin
-New version of arkade installed to /usr/local/bin
-Creating alias 'ark' for 'arkade'.
-            _             _
-  __ _ _ __| | ____ _  __| | ___
- / _` | '__| |/ / _` |/ _` |/ _ \
-| (_| | |  |   < (_| | (_| |  __/
- \__,_|_|  |_|\_\__,_|\__,_|\___|
+When using AWS tools some of the developer focused utilities are installed explicitly.
 
-Get Kubernetes apps the easy way
+Instructions for installing the various tools can be found in the following list :
 
-Version: 0.7.10
-Git Commit: 0931a3af1754c0e5fdd4013b666cdac2821a300d
-```
+* nerdctl an image wrangling tool can be found at, https://github.com/containerd/nerdctl#readme.
+* trivy a tool for image scanning can be found at, https://aquasecurity.github.io/trivy/v0.21.3/getting-started/installation/
+* helm a tool for Kubernetes package management can be found at, https://helm.sh/docs/intro/install/
+* kubectl a CLI tool for running commands against Kubernetes clusters can be found at, https://kubernetes.io/docs/tasks/tools/
 
-arkcade will use an account specific location for executables which you should add to your path.
-
-```
-$ export PATH=$PATH:$HOME/.arkade/bin/
-```
-
-## Install Kubectl CLI
-
-Installing the kubectl CLI can be done using arkade.
-
-<pre><code><b>ark get kubectl</b>
-Downloading kubectl
-https://storage.googleapis.com/kubernetes-release/release/v1.20.0/bin/linux/amd64/kubectl
-38.37 MiB / 38.37 MiB [-------------------------------------------------------------------------------------------------------------------------------------] 100.00%
-Tool written to: /home/kmutch/.arkade/bin/kubectl
-
-# Add (kubectl) to your PATH variable
-export PATH=$PATH:$HOME/.arkade/bin/
-
-# Test the binary:
-/home/kmutch/.arkade/bin/kubectl
-
-# Or install with:
-sudo mv /home/kmutch/.arkade/bin/kubectl /usr/local/bin/
-</code></pre>
-
-Add kubectl autocompletion to your current shell:
-
-<pre><code><b>source \<(kubectl completion $(basename $SHELL))</b>
-</code></pre>
-
-You can verify that kubectl is installed by executing the following command:
-
-<pre><code><b>kubectl version --client</b>
-Client Version: version.Info{Major:"1", Minor:"20", GitVersion:"v1.20.0", GitCommit:"af46c47ce925f4c4ad5cc8d1fca46c7b77d13b38", GitTreeState:"clean", BuildDate:"2020-12-09T16:50:1
-7Z", GoVersion:"go1.15.6", Compiler:"gc", Platform:"linux/amd64"}
-</code></pre>
-
-## Kubernetes
-
-The experimentsrv component comes with an Istio definition file for deployment into AWS, or KinD using Kubernetes (k8s) and Istio.
-
-The deployment definition file can be found at cmd/experimentsrv/experimentsrv.yaml.
-
-Using AWS k8s will use both the kops, and the kubectl tools. You should have an AWS account configured prior to starting deployments, and your environment variables for using the AWS cli should also be done.
-
-## Base cluster installation
-
-This documentation Kubernetes describes several means by which Kubernetes clusters can be installed, choose one however there are many other alternatives also available.
-
-### Installating Kubernetes in Docker (KinD)
-
-The KinD installation will typically need a registry included in order for cluster images to be pulled.  An AWS registry could be used however this would negate the objective of having a local registry and no dependency on AWS.
-
-KinD provides a means by which a kubernetes cluster can be installed using the Docker Desktop platform, or on linux plain docker.  KinD installation is supported by arkade and installed as follows:.
-
-```
-$ ark get kind
-Downloading kind
-https://github.com/kubernetes-sigs/kind/releases/download/v0.9.0/kind-linux-amd64
-7.08 MiB / 7.08 MiB [---------------------------------------------------------------------------------------------------------------------------------------------------] 100.00%
-Tool written to: /home/kmutch/.arkade/bin/kind
-
-# Add (kind) to your PATH variable
-export PATH=$PATH:$HOME/.arkade/bin/
-
-# Test the binary:
-/home/kmutch/.arkade/bin/kind
-
-# Or install with:
-sudo mv /home/kmutch/.arkade/bin/kind /usr/local/bin/
-```
-
-The KinD cluster and the registry can be installed using a script within the source code repository, 'kind\_install.sh'.  This script will first check to see if there is a image registry already running on your local docker instance and if not will start one, it will then initialize a KinD instance that trusts your local registry.
-
-```
-$ /bin/sh ./kind_install.sh
-Creating cluster "kind" ...
- ✓ Ensuring node image (kindest/node:v1.19.1) 🖼
- ✓ Preparing nodes 📦
- ✓ Writing configuration 📜
- ✓ Starting control-plane 🕹️
- ✓ Installing CNI 🔌
- ✓ Installing StorageClass 💾
-Set kubectl context to "kind-kind"
-You can now use your cluster with:
-
-kubectl cluster-info --context kind-kind
-
-Thanks for using kind! 😊
-configmap/local-registry-hosting created
-$ kubectl config set-context  --namespace=default kind-kind
-Context "kind-kind" modified.
-$ kubectl get nodes
-NAME                 STATUS   ROLES    AGE   VERSION
-kind-control-plane   Ready    master   68s   v1.19.1
-```
-
-After this the next step is to proceed to the certificates installation section.
-
-### Installing AWS Kubernetes
-
-The current preferred approach to deploying on AWS is to make use of EKS via the eksctl tool.  The kops instructions in this section are provided for older deployments.
-
-#### Using eksctl with auto-scaling
+The current preferred approach for deploying on AWS is to make use of EKS, via the eksctl tool.
 
 To install eksctl the following should be done.
 
@@ -221,6 +157,7 @@ $ sudo mv /tmp/eksctl /usr/local/bin
 $ eksctl version
 ```
 
+### Using eksctl with auto-scaling
 
 A basic cluster with auto scaling can be initialized using eksctl and then the addition of the auto-scaler from the Kubernetes project can be used to scale out the project.  The example eks-cluster.yaml file contains the definitions of a cluster within the us-west-2 region, named platform-services.  Before deploying a long lived cluster it is worth while considering cost savings options which are described at the following URL, https://aws.amazon.com/ec2/cost-and-capacity/.
 
@@ -297,90 +234,14 @@ rolebinding.rbac.authorization.k8s.io/cluster-autoscaler created
 deployment.apps/cluster-autoscaler created
 </code></pre>
 
-#### Using kops
-
-If you are using azure or GCP then options such as acs-engine, and skaffold are natively supported by the cloud vendors and written in Go so are readily usable and can be easily customized and maintained and so these are recommended for those cases.
-
-When using AWS the TLS certificates used to secure the connections to your AWS LoadBalancer will require that an ElasticIP is used.  It is recommended that an ElasticIP is allocated for use and then your DNS entries on the domain registra are modified to used the IP as a registered host matching the LetsEncrypt certificate used.  Using an ElasticIP allows the cluster to be regenerated and for the LoadBalancer to be reassociated with the IP whenever the cluster is regenerated.
-
-<pre><code><b>curl -LO https://github.com/kubernetes/kops/releases/download/v1.16.0/kops-linux-amd64
-chmod +x kops-linux-amd64
-sudo mv kops-linux-amd64 /usr/local/bin/kops
-
-Add kubectl autocompletion to your current shell:
-
-source <(kops completion $(basename $SHELL))
-</b></code></pre>
-
-In order to seed your S3 KOPS\_STATE\_STORE version controlled bucket with a cluster definition the following command could be used:
-
-<pre><code><b>export AWS_AVAILABILITY_ZONES="$(aws ec2 describe-availability-zones --query 'AvailabilityZones[].ZoneName' --output text | awk -v OFS="," '$1=$1')"
-
-export S3_BUCKET=kops-platform-$USER
-export KOPS_STATE_STORE=s3://$S3_BUCKET
-aws s3 mb $KOPS_STATE_STORE
-aws s3api put-bucket-versioning --bucket $S3_BUCKET --versioning-configuration Status=Enabled
-
-export CLUSTER_NAME=test-$USER.platform.cluster.k8s.local
-
-kops create cluster --name $CLUSTER_NAME --zones $AWS_AVAILABILITY_ZONES --node-count 1 --node-size=m4.2xlarge --cloud-labels="HostUser=$HOST:$USER"
-</b></code></pre>
-
-Optionally use an image from your preferred zone e.g. --image=ami-0def3275.  Also you can modify the AWS machine types, recommended during developer testing using options such as '--master-size=m4.large --node-size=m4.large'.
-
-Starting the cluster can now be done using the following command:
-
-<pre><code><b>kops update cluster $CLUSTER_NAME --yes</b>
-I0309 13:48:49.798777    6195 apply_cluster.go:442] Gossip DNS: skipping DNS validation
-I0309 13:48:49.961602    6195 executor.go:91] Tasks: 0 done / 81 total; 30 can run
-I0309 13:48:50.383671    6195 vfs_castore.go:715] Issuing new certificate: "ca"
-I0309 13:48:50.478788    6195 vfs_castore.go:715] Issuing new certificate: "apiserver-aggregator-ca"
-I0309 13:48:50.599605    6195 executor.go:91] Tasks: 30 done / 81 total; 26 can run
-I0309 13:48:51.013957    6195 vfs_castore.go:715] Issuing new certificate: "kube-controller-manager"
-I0309 13:48:51.087447    6195 vfs_castore.go:715] Issuing new certificate: "kube-proxy"
-I0309 13:48:51.092714    6195 vfs_castore.go:715] Issuing new certificate: "kubelet"
-I0309 13:48:51.118145    6195 vfs_castore.go:715] Issuing new certificate: "apiserver-aggregator"
-I0309 13:48:51.133527    6195 vfs_castore.go:715] Issuing new certificate: "kube-scheduler"
-I0309 13:48:51.157876    6195 vfs_castore.go:715] Issuing new certificate: "kops"
-I0309 13:48:51.167195    6195 vfs_castore.go:715] Issuing new certificate: "apiserver-proxy-client"
-I0309 13:48:51.172542    6195 vfs_castore.go:715] Issuing new certificate: "kubecfg"
-I0309 13:48:51.179730    6195 vfs_castore.go:715] Issuing new certificate: "kubelet-api"
-I0309 13:48:51.431304    6195 executor.go:91] Tasks: 56 done / 81 total; 21 can run
-I0309 13:48:51.568136    6195 launchconfiguration.go:334] waiting for IAM instance profile "nodes.test.platform.cluster.k8s.local" to be ready
-I0309 13:48:51.576067    6195 launchconfiguration.go:334] waiting for IAM instance profile "masters.test.platform.cluster.k8s.local" to be ready
-I0309 13:49:01.973887    6195 executor.go:91] Tasks: 77 done / 81 total; 3 can run
-I0309 13:49:02.489343    6195 vfs_castore.go:715] Issuing new certificate: "master"
-I0309 13:49:02.775403    6195 executor.go:91] Tasks: 80 done / 81 total; 1 can run
-I0309 13:49:03.074583    6195 executor.go:91] Tasks: 81 done / 81 total; 0 can run
-I0309 13:49:03.168822    6195 update_cluster.go:279] Exporting kubecfg for cluster
-kops has set your kubectl context to test.platform.cluster.k8s.local
-        image: {{.duat.awsecr}}/platform-services/{{.duat.module}}:{{.duat.version}}
-
-Cluster is starting.  It should be ready in a few minutes.
-
-Suggestions:
- * validate cluster: kops validate cluster
- * list nodes: kubectl get nodes --show-labels
- * ssh to the master: ssh -i ~/.ssh/id_rsa admin@api.test.platform.cluster.k8s.local
- * the admin user is specific to Debian. If not using Debian please use the appropriate user based on your OS.
- * read about installing addons at: https://github.com/kubernetes/kops/blob/master/docs/addons.md.
-
-<b>
-while [ 1 ]; do
-    kops validate cluster > /dev/null && break || sleep 10
-done;
-</b></code></pre>
-
-The initial cluster spinup will take sometime, use kops commands such as 'kops validate cluster' to determine when the cluster is spun up ready for Istio and the platform services.
-
-## Istio 1.9.x
+## Istio 1.12.x
 
 Istio affords a control layer on top of the k8s data plane.  Instructions for deploying Istio are the vanilla instructions that can be found at, https://istio.io/docs/setup/getting-started/#install.  Istio was at one time a Helm based installation but has since moved to using its own methodology, this is the reason we dont use arkade to install it.
 
-<pre><code><b>cd ~
-curl -LO https://github.com/istio/istio/releases/download/1.9.2/istio-1.9.2-linux-amd64.tar.gz
-tar xzf istio-1.9.2-linux-amd64.tar.gz
-export ISTIO_DIR=`pwd`/istio-1.9.2
+<pre><code><b>cd $HOME
+curl -q -LO https://github.com/istio/istio/releases/download/1.12.1/istio-1.12.1-linux-amd64.tar.gz
+tar xzf istio-1.12.1-linux-amd64.tar.gz
+export ISTIO_DIR=$HOME/istio-1.12.1
 export PATH=$ISTIO_DIR/bin:$PATH
 cd -
 istioctl install --set profile=demo -y
@@ -403,7 +264,13 @@ export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressga
 
 Helm is used by several packages that are deployed using Kubernetes.  Helm can be installed using instructions found at, https://helm.sh/docs/using\_helm/#installing-helm.  For snap based linux distributions the following can be used as a quick-start.
 
-<pre><code><b>sudo snap install helm --classic
+<pre><code><b>
+curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+sudo apt-get install apt-transport-https --yes
+echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
 kubectl create serviceaccount --namespace kube-system tiller
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 helm repo update
@@ -411,7 +278,7 @@ helm repo update
 
 ## Encryption
 
-This section describes how to secure traffic into the service mesh ingress.  Lets Encrypt is an internet based service for provisioning certificates.  If you are using a locally deployed mesh within KinD for example you will need to use the minica approach.
+This section describes how to secure traffic into the service mesh ingress.  Lets Encrypt is an internet based service for provisioning certificates.  If you are using a locally deployed mesh within rancher desktop for example you will need to use the minica approach.
 
 ### minica
 
@@ -420,18 +287,16 @@ Minica is a simple CA intended for use in situations where the CA operator also 
 More information about minica can be found at, https://github.com/jsha/minica.
 
 <pre><code>
-$ go get github.com/jsha/minica
-go: downloading github.com/jsha/minica v1.0.2
-go: github.com/jsha/minica upgrade =&lt; v1.0.2
+$ go install github.com/jsha/minica@latest
 $ mkdir minica
 $ cd minica
-$ minica --domain platform-services.cognizant-ai.net
+$ minica -domains platform-services.karlmutch.com
 $ cd -
 $ tree minica
 minica
 ├── minica-key.pem
 ├── minica.pem
-└── platform-services.cognizant-ai.net
+└── platform-services.karlmutch.com
     ├── cert.pem
     └── key.pem
 
@@ -440,11 +305,11 @@ minica
 
 ### Lets Encrypt
 
-letsencrypt is a public SSL/TLS certificate provider intended for use with the open internet that is being used to secure our service mesh for this project. The lets encrypt provisioning tool can be installed from github and accessed to produce TLS certificates for your service.  If you are deploying on KinD or a local installation then lets encrypt is not supported and using minica, https://github.com/jsha/minica, is recommended instead for testing purposes.
+letsencrypt is a public SSL/TLS certificate provider intended for use with the open internet that is being used to secure our service mesh for this project. The lets encrypt provisioning tool can be installed from github and accessed to produce TLS certificates for your service.  If you are deploying on rancher desktop or a local installation then lets encrypt is not supported and using minica, https://github.com/jsha/minica, is recommended instead for testing purposes.
 
-Prior to running the lets encrypt tools you should identify the desired DNS hostname and email you wish to use for your example service cluster.  In our example we have a domain registered as, cognizant-ai.net.  This domain is available to us as an administrator, and we have choosen to use the host name platform-service.cognizant-ai.net as the services hostname.
+Prior to running the lets encrypt tools you should identify the desired DNS hostname and email you wish to use for your example service cluster.  In our example we have a domain registered as, karlmutch.com.  This domain is available to us as an administrator, and we have choosen to use the host name platform-service.karlmutch.com as the services hostname.
 
-The first step is to add a registered hosts entry for the platform-services.cognizant-ai.net host into the DNS account, if the host is unknown add an IP address such as 127.0.0.1.  During the generation process you will be prompted to add a DNS TXT record into the custom resource records for the domain, this requires the dummy entry to be present.
+The first step is to add a registered hosts entry for the platform-services.karlmutch.com host into the DNS account, if the host is unknown add an IP address such as 127.0.0.1.  During the generation process you will be prompted to add a DNS TXT record into the custom resource records for the domain, this requires the dummy entry to be present.
 
 Setting up and initiating this process can be done using the following:
 
@@ -457,7 +322,7 @@ remote: Total 71278 (delta 135), reused 110 (delta 65), pack-reused 71023
 Receiving objects: 100% (71278/71278), 23.55 MiB | 26.53 MiB/s, done.
 Resolving deltas: 100% (52331/52331), done.
 <b>cd letsencrypt</b>
-<b>./letsencrypt-auto certonly --rsa-key-size 4096 --agree-tos --manual --preferred-challenges=dns --email=karlmutch@cognizant.com -d platform-services.cognizant-ai.net</b>
+<b>./letsencrypt-auto certonly --rsa-key-size 4096 --agree-tos --manual --preferred-challenges=dns --email=karlmutch@cognizant.com -d platform-services.karlmutch.com</b>
 </code></pre>
 
 You will be prompted with the IP address logging when starting the script, you should choose 'Y' to enabled the logging as this assists auditing of DNS changes on the internet by registras and regulatory bodies.
@@ -473,7 +338,7 @@ After this step you will be asked to add a text record to your DNS records provi
 <pre><code>
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Please deploy a DNS TXT record under the name
-acme-challenge.platform-services.cognizant-ai.net with the following value:
+acme-challenge.platform-services.karlmutch.com with the following value:
 
 mbUa9_gb4RVYhTumHy3zIi3PIXFh0k_oOgCie4NvhqQ
 
@@ -490,9 +355,9 @@ Cleaning up challenges
 
 IMPORTANT NOTES:
  - Congratulations! Your certificate and chain have been saved at:
-   /etc/letsencrypt/live/platform-services.cognizant-ai.net/fullchain.pem
+   /etc/letsencrypt/live/platform-services.karlmutch.com/fullchain.pem
    Your key file has been saved at:
-   /etc/letsencrypt/live/platform-services.cognizant-ai.net/privkey.pem
+   /etc/letsencrypt/live/platform-services.karlmutch.com/privkey.pem
    Your cert will expire on 2020-02-23. To obtain a new or tweaked
    version of this certificate in the future, simply run
    letsencrypt-auto again. To non-interactively renew *all* of your
@@ -513,7 +378,7 @@ This project makes use of several secrets that are used to access resources unde
 
 The experiment service Honeycomb observability solution uses a key to access Datasets defined by the Honeycomb account and store events in the same.  Configuring the service is done by creating a Kubernetes secret.  For now we can define the Honeycomb Dataset, and API key using an environment variable and when we deploy the secrets for the Postgres Database the secret for the API will be injected using the stencil tool.
 
-<pre><code><b>export O11Y_KEY=a54d762df847474b22915
+<pre><code><b>export O11Y_KEY=a55676f62a47474b8491a
 export O11Y_DATASET=platform-services
 </b></code></pre>
 
@@ -537,16 +402,16 @@ If you used Lets Encrypt then the following applies:
 
 <pre><code><b>
 sudo kubectl create -n istio-system secret generic platform-services-tls-cert \
-    --from-file=key=/etc/letsencrypt/live/platform-services.cognizant-ai.net/privkey.pem \
-    --from-file=cert=/etc/letsencrypt/live/platform-services.cognizant-ai.net/fullchain.pem
+    --from-file=key=/etc/letsencrypt/live/platform-services.karlmutch.com/privkey.pem \
+    --from-file=cert=/etc/letsencrypt/live/platform-services.karlmutch.com/fullchain.pem
 </b></code></pre>
 
 If minica was used then the following would be used:
 
 <pre><code><b>
 kubectl create -n istio-system secret generic platform-services-tls-cert \
-    --from-file=key=./minica/platform-services.cognizant-ai.net/key.pem \
-    --from-file=cert=./minica/platform-services.cognizant-ai.net/cert.pem
+    --from-file=key=./minica/platform-services.karlmutch.com/key.pem \
+    --from-file=cert=./minica/platform-services.karlmutch.com/cert.pem
 </b></code></pre>
 
 If you are using AWS ACM to manage your certificates the platform-services-tls-cert secret is not required.
@@ -558,7 +423,17 @@ Istio provides an ingress resource that can be used to secure the service using 
 Using your own secrets you will use the default ingress yaml that will point at the platform-services-tls-cert Kubernetes provisioned in the previous section.
 
 <pre><code><b>
-kubectl apply -f ingress.yaml
+cp ingress.yaml ingress-$USER.yaml
+</b></code></pre>
+
+You MUST also modify the ingress.yaml file to contain the appropriate information for the JWT values that are specific to your Auth0 applicaiton.
+
+<pre><code><b>
+vim ingress-$USER.yaml
+</b></code></pre>
+
+<pre><code><b>
+kubectl apply -f ingress-$USER.yaml
 </b></code></pre>
 
 ### Deploying using AWS Route 53 and ACM Public CA
@@ -587,20 +462,20 @@ Address: 54.70.157.123
             "Changes": [{
             "Action": "UPSERT",
                         "ResourceRecordSet": {
-                                    "Name": "platform-services.cognizant-ai.net",
+                                    "Name": "platform-services.karlmutch.com",
                                     "Type": "A",
                                     "TTL": 300,
                                  "ResourceRecords": [{ "Value": "35.163.132.217"}, {"Value": "54.70.157.123"}]
 }}]
 }
 EOF
-aws route53 list-hosted-zones-by-name --dns-name cognizant-ai.net</b>
+aws route53 list-hosted-zones-by-name --dns-name karlmutch.com</b>
 
 {
     "HostedZones": [
         {
             "Id": "/hostedzone/Z1UZMEEDVXVHH3",
-            "Name": "cognizant-ai.net.",
+            "Name": "karlmutch.com.",
             "CallerReference": "RISWorkflow-RD:97f5f182-4b86-41f1-9a24-46218ab70d25",
             "Config": {
                 "Comment": "HostedZone created by Route53 Registrar",
@@ -609,7 +484,7 @@ aws route53 list-hosted-zones-by-name --dns-name cognizant-ai.net</b>
             "ResourceRecordSetCount": 16
         }
     ],
-    "DNSName": "cognizant-ai.net",
+    "DNSName": "karlmutch.com",
     "IsTruncated": false,
     "MaxItems": "100"
 }
@@ -635,31 +510,31 @@ aws route53 list-hosted-zones-by-name --dns-name cognizant-ai.net</b>
 
 Now we are in a position to generate the certificate:
 <pre><code>
-<b>aws acm request-certificate --domain-name platform-services.cognizant-ai.net --validation-method DNS --idempotency-token 1234</b>
+<b>aws acm request-certificate --domain-name platform-services.karlmutch.com --validation-method DNS --idempotency-token 1234</b>
 {
     "CertificateArn": "arn:aws:acm:us-west-2:613076437200:certificate/dcd2ca31-f27c-45ac-85a7-539688f8e4cb"
 }
 {
     "Certificate": {
         "CertificateArn": "arn:aws:acm:us-west-2:613076437200:certificate/dcd2ca31-f27c-45ac-85a7-539688f8e4cb",
-        "DomainName": "platform-services.cognizant-ai.net",
+        "DomainName": "platform-services.karlmutch.com",
         "SubjectAlternativeNames": [
-            "platform-services.cognizant-ai.net"
+            "platform-services.karlmutch.com"
         ],
         "DomainValidationOptions": [
             {
-                "DomainName": "platform-services.cognizant-ai.net",
-                "ValidationDomain": "platform-services.cognizant-ai.net",
+                "DomainName": "platform-services.karlmutch.com",
+                "ValidationDomain": "platform-services.karlmutch.com",
                 "ValidationStatus": "PENDING_VALIDATION",
                 "ResourceRecord": {
-                    "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.cognizant-ai.net.",
+                    "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.karlmutch.com.",
                     "Type": "CNAME",
                     "Value": "_e327e9f51160630a9f0056fd3eb56a74.bbfvkzsszw.acm-validations.aws."
                 },
                 "ValidationMethod": "DNS"
             }
         ],
-        "Subject": "CN=platform-services.cognizant-ai.net",
+        "Subject": "CN=platform-services.karlmutch.com",
         "Issuer": "Amazon",
         "CreatedAt": 1617837918.0,
         "Status": "PENDING_VALIDATION",
@@ -681,7 +556,7 @@ Now we are in a position to generate the certificate:
             "Changes": [{
             "Action": "UPSERT",
                         "ResourceRecordSet": {
-                                 "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.cognizant-ai.net.",
+                                 "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.karlmutch.com.",
                                  "Type": "CNAME",
                                  "TTL": 300,
                                  "ResourceRecords": [{ "Value": "_e327e9f51160630a9f0056fd3eb56a74.bbfvkzsszw.acm-validations.aws."}]
@@ -711,17 +586,17 @@ aws route53 change-resource-record-sets --hosted-zone-id Z1UZMEEDVXVHH3  --chang
 {
     "Certificate": {
         "CertificateArn": "arn:aws:acm:us-west-2:613076437200:certificate/dcd2ca31-f27c-45ac-85a7-539688f8e4cb",
-        "DomainName": "platform-services.cognizant-ai.net",
+        "DomainName": "platform-services.karlmutch.com",
         "SubjectAlternativeNames": [
-            "platform-services.cognizant-ai.net"
+            "platform-services.karlmutch.com"
         ],
         "DomainValidationOptions": [
             {
-                "DomainName": "platform-services.cognizant-ai.net",
-                "ValidationDomain": "platform-services.cognizant-ai.net",
+                "DomainName": "platform-services.karlmutch.com",
+                "ValidationDomain": "platform-services.karlmutch.com",
                 "ValidationStatus": "SUCCESS",
                 "ResourceRecord": {
-                    "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.cognizant-ai.net.",
+                    "Name": "_a9d4b51d79d2b08121a0796cbfbb7a68.platform-services.karlmutch.com.",
                     "Type": "CNAME",
                     "Value": "_e327e9f51160630a9f0056fd3eb56a74.bbfvkzsszw.acm-validations.aws."
                 },
@@ -729,7 +604,7 @@ aws route53 change-resource-record-sets --hosted-zone-id Z1UZMEEDVXVHH3  --chang
             }
         ],
         "Serial": "07:df:33:6b:78:11:e2:a3:ee:f1:54:51:3f:81:78:28",
-        "Subject": "CN=platform-services.cognizant-ai.net",
+        "Subject": "CN=platform-services.karlmutch.com",
         "Issuer": "Amazon",
         "CreatedAt": 1617837918.0,
         "IssuedAt": 1617839861.0,
@@ -791,11 +666,11 @@ EOF
 A test of the certificate on an empty ingress will then appear as follows:
 
 <pre><code>
-<b>curl -Iv https://platform-services.cognizant-ai.net</b>
-* Rebuilt URL to: https://platform-services.cognizant-ai.net/
+<b>curl -Iv https://platform-services.karlmutch.com</b>
+* Rebuilt URL to: https://platform-services.karlmutch.com/
 *   Trying 35.163.132.217...
 * TCP_NODELAY set
-* Connected to platform-services.cognizant-ai.net (35.163.132.217) port 443 (#0)
+* Connected to platform-services.karlmutch.com (35.163.132.217) port 443 (#0)
 * ALPN, offering h2
 * ALPN, offering http/1.1
 * successfully set certificate verify locations:
@@ -813,20 +688,20 @@ A test of the certificate on an empty ingress will then appear as follows:
 * SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256
 * ALPN, server did not agree to a protocol
 * Server certificate:
-*  subject: CN=platform-services.cognizant-ai.net
+*  subject: CN=platform-services.karlmutch.com
 *  start date: Apr  7 00:00:00 2021 GMT
 *  expire date: May  6 23:59:59 2022 GMT
-*  subjectAltName: host "platform-services.cognizant-ai.net" matched cert's "platform-services.cognizant-ai.net"
+*  subjectAltName: host "platform-services.karlmutch.com" matched cert's "platform-services.karlmutch.com"
 *  issuer: C=US; O=Amazon; OU=Server CA 1B; CN=Amazon
 *  SSL certificate verify ok.
 > HEAD / HTTP/1.1
-> Host: platform-services.cognizant-ai.net
+> Host: platform-services.karlmutch.com
 > User-Agent: curl/7.58.0
 > Accept: */*
 >
 * TLSv1.2 (IN), TLS alert, Client hello (1):
 * Empty reply from server
-* Connection #0 to host platform-services.cognizant-ai.net left intact
+* Connection #0 to host platform-services.karlmutch.com left intact
 curl: (52) Empty reply from server
 </code></pre>
 
@@ -850,20 +725,20 @@ To deploy the platform experiment service a database must be present.  The PoC i
 
 If you wish to use Aurora then you will need to use the AWS CLI Tools or the Web Console to create your Postgres Database appropriately, and then to set your environment variables PGHOST, PGPORT, PGUSER, PGPASSWORD, and PGDATABASE appropriately.  You will also be expected to run the sql setup scripts yourself.
 
-The first step is to install the postgres 11 client on your system and then to populate the schema on the remote database:
+The first step is to install the postgres 14 client on your system and then to populate the schema on the remote database:
 
 <pre><code><b></b>
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
 sudo apt-get -y update
-sudo apt-get -y --upgrade postgresql-client-11
+sudo apt-get -y --upgrade install postgresql-client-14
 </code></pre>
 
 ### Deploying an in-cluster Database
 
 This section gives guidence on how to install an in-cluster database for use-cases where data persistence beyond a single deployment is not a concern.  These instructions are therefore limited to testing only scenarios.  For information concerning Kubernetes storage strategies you should consult other sources and read about stateful sets in Kubernetes.  In production using a single source of truth then cloud provider offerings such as AWS Aurora are recommended.
 
-A secrets file containing host information, passwords and other secrets is assumed to have already been applied using the instructions several sections above.  The secrets are needed to allows access to the postgres DB, and/or other external resources.  YAML files will be needed to populate secrets into the service mesh, individual services document the secrets they require within their README.md files found on github and provide examples, for example https://github.com/leaf-ai/platform-services/cmd/experimentsrv/README.md.
+A secrets file containing host information, passwords and other secrets is assumed to have already been applied using the instructions several sections above.  The secrets are needed to allows access to the postgres DB, and/or other external resources.  YAML files will be needed to populate secrets into the service mesh, individual services document the secrets they require within their README.md files found on github and provide examples, for example https://github.com/karlmutch/platform-services/cmd/experimentsrv/README.md.
 
 In order to deploy Postgres this document describes a helm based approach.  The bitnami postgresql distribution can be installed using the following:
 
@@ -918,9 +793,9 @@ Further information about how to deployed the service specific database for the 
 
 ## Deploying into the Istio mesh
 
-This section describes the activities for deployment of the services provided by the Plaform PoC.  The first two sections provide a description of how to deploy the TLS secured ingress for the service mesh, the first being for cloud provisioned systems and the second for the localized KinD based deployment.
+This section describes the activities for deployment of the services provided by the Plaform PoC.  The first two sections provide a description of how to deploy the TLS secured ingress for the service mesh, the first being for cloud provisioned systems and the second for the localized rancher desktop based deployment.
 
-### Configuring the KinD ingress (Critical Step)
+### Configuring the Rancher Desktop ingress (Critical Step)
 
 <pre><code><b>
 export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o jsonpath='{.items[0].status.hostIP}')
@@ -936,7 +811,7 @@ INGRESS_HOST=`kubectl get svc --namespace istio-system -o go-template='{{range .
 dig +short $INGRESS_HOST
 </b></code></pre>
 
-Take the IP addresses from the above output and use these as the A record for the LetsEncrypt host name, platform-services.cognizant-ai.net, and this will enable accessing the mesh and validation of the common name (CN) in the certificate.  After several minutes, you should test this step by using the following command to verify that the certificate negotiation is completed.
+Take the IP addresses from the above output and use these as the A record for the LetsEncrypt host name, platform-services.karlmutch.com, and this will enable accessing the mesh and validation of the common name (CN) in the certificate.  After several minutes, you should test this step by using the following command to verify that the certificate negotiation is completed.
 
 ### Service deployment overview
 
@@ -951,7 +826,7 @@ ip-172-20-55-189.us-west-2.compute.internal    Ready     master    18m       v1.
 
 Once secrets are loaded individual services can be deployed from a checked out developer copy of the service repo using a command like the following :
 
-<pre><code><b>cd ~/project/src/github.com/leaf-ai/platform-services</b>
+<pre><code><b>cd ~/project/src/github.com/karlmutch/platform-services</b>
 <b>cd cmd/[service] ; kubectl apply -f \<(stencil [service].yaml 2>/dev/null); cd - </b>
 </code></pre>
 
@@ -966,15 +841,15 @@ In order to locate the image repository the stencil tool will test for the prese
 
 Once the application is deployed you can discover the gateway points within the kubernetes cluster by using the kubectl commands as documented in the cmd/experimentsrv/README.md file.
 
-More information about deploying a real service and using the experimentsrv server can be found at, https://github.com/leaf-ai/platform-services/blob/master/cmd/experimentsrv/README.md.
+More information about deploying a real service and using the experimentsrv server can be found at, https://github.com/karlmutch/platform-services/blob/master/cmd/experimentsrv/README.md.
 
-### Testing connectivity using KinD
+### Testing connectivity using Rancher Desktop
 
 Once the initial services have been deployed the connectivity can be tested using the following:
 
-<pre><code><b>curl -Iv --cacert minica/platform-services.cognizant-ai .net/../minica.pem --header "Host: platform-services.cognizant-ai.net"  --connect-to "platform-services.cognizant-ai.net:$SECURE_INGRESS_PORT:$CLUSTER_INGRESS" https://platform-services.cognizant-ai.net:$SECURE_INGRESS_PORT
+<pre><code><b>curl -Iv --cacert minica/platform-services.karlmutch.com/../minica.pem --header "Host: platform-services.karlmutch.com"  --connect-to "platform-services.karlmutch.com:$SECURE_INGRESS_PORT:$CLUSTER_INGRESS" https://platform-services.karlmutch.com:$SECURE_INGRESS_PORT
 </b>
-* Rebuilt URL to: https://platform-services.cognizant-ai.net:30017/
+* Rebuilt URL to: https://platform-services.karlmutch.com:30017/
 * Connecting to hostname: 172.20.0.2
 * Connecting to port: 30017
 *   Trying 172.20.0.2...
@@ -983,7 +858,7 @@ Once the initial services have been deployed the connectivity can be tested usin
 * ALPN, offering h2
 * ALPN, offering http/1.1
 * successfully set certificate verify locations:
-*   CAfile: minica/platform-services.cognizant-ai.net/../minica.pem
+*   CAfile: minica/platform-services.karlmutch.com/../minica.pem
   CApath: /etc/ssl/certs
 * TLSv1.3 (OUT), TLS handshake, Client hello (1):
 * TLSv1.3 (IN), TLS handshake, Server hello (2):
@@ -998,10 +873,10 @@ Once the initial services have been deployed the connectivity can be tested usin
 * SSL connection using TLSv1.3 / TLS\_AES\_256\_GCM\_SHA384
 * ALPN, server accepted to use h2
 * Server certificate:
-*  subject: CN=platform-services.cognizant-ai.net
+*  subject: CN=platform-services.karlmutch.com
 *  start date: Dec 23 18:10:54 2020 GMT
 *  expire date: Jan 22 18:10:54 2023 GMT
-*  subjectAltName: host "platform-services.cognizant-ai.net" matched cert's "platform-services.cognizant-ai.net"
+*  subjectAltName: host "platform-services.karlmutch.com" matched cert's "platform-services.karlmutch.com"
 *  issuer: CN=minica root ca 34d475
 *  SSL certificate verify ok.
 * Using HTTP2, server supports multi-use
@@ -1013,7 +888,7 @@ Once the initial services have been deployed the connectivity can be tested usin
 * Using Stream ID: 1 (easy handle 0x5584d85765c0)
 * TLSv1.3 (OUT), TLS Unknown, Unknown (23):
 \> HEAD / HTTP/2
-\> Host: platform-services.cognizant-ai.net
+\> Host: platform-services.karlmutch.com
 \> User-Agent: curl/7.58.0
 \> Accept: */*
 \>
@@ -1041,8 +916,8 @@ A very basic test of the TLS negotiation can be done using the curl command:
 
 <pre><code><b>
 curl -Iv https://helloworld.letsencrypt.org
-curl -Iv https://platform-services.cognizant-ai.net:$SECURE_INGRESS_PORT
-export INGRESS_HOST=platform-services.cognizant-ai.net:$SECURE_INGRESS_PORT
+curl -Iv https://platform-services.karlmutch.com:$SECURE_INGRESS_PORT
+export INGRESS_HOST=platform-services.karlmutch.com:$SECURE_INGRESS_PORT
 </b></code></pre>
 
 ### Debugging
@@ -1128,7 +1003,7 @@ Platform services are secured using the Auth0.com service.  Auth0 is a service t
 
 Auth0 supports the ability to create a hosted database for storing user account and credential information.  You should navigate to the Connections -> Database section and create a database with the name of "Username-Password-Authentication".  This will be used later when creating applications as your source of user information.
 
-Auth0 authorizations can be done using a Demo auth0.com account.  To do this you will need to add a custom API to the Auth0 account, call it something like "Experiments API" and give it an identifier of "http://api.cognizant-ai.net/experimentsrv", you should also enable RBAC and the "Add Permissions in the Access Token" options.  Then use the save button to persist the new API.  Identifiers are used as the 'audience' setting when generating tokens via web calls against the AAA features of the Auth0 platform.
+Auth0 authorizations can be done using a Demo auth0.com account.  To do this you will need to add a custom API to the Auth0 account, call it something like "Experiments API" and give it an identifier of "http://api.karlmutch.com/experimentsrv", you should also enable RBAC and the "Add Permissions in the Access Token" options.  Then use the save button to persist the new API.  Identifiers are used as the 'audience' setting when generating tokens via web calls against the AAA features of the Auth0 platform.
 
 The next stop is to use the menu bar to select the "Permissions" tab.  This tab allows you to create a scope to be used for the permissions granted to user.  Create a scope called "all:experiments" with a description, and select the Add button.  This scope will become available for use by authenticated user roles to allow them to access the API.
 
@@ -1143,11 +1018,11 @@ The next step is to create a User and assign the user a role.  The left hand pan
 You can now use various commands to manipulate the APIs outside of what will exist in the application code, this is a distinct advantage over directly using enterprise tools such as Okta.  Should you wish to use Okta as an Identity provider, or backend, to Auth0 then this can be done however you will need help from our Tech Ops department to do this and is an expensive option.  At this time the user and passwords being used for securing APIs can be managed through the Auth0 dashboard including the ability to invite users to become admins.
 
 <pre><code><b>
-export AUTH0_DOMAIN=cognizant-ai.auth0.com
+export AUTH0_DOMAIN=karlmutch.auth0.com
 export AUTH0_CLIENT_ID=pL3iSUmOB7EPiXae4gPfuEasccV7PATs
 export AUTH0_CLIENT_SECRET=KHSCFuFumudWGKISCYD79ZkwF2YFCiQYurhjik0x6OKYyOb7TkfGKJrHKXXADzqG
-export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.cognizant-ai.net/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": Ap9ss2345f"", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
-export AUTH0_TOKEN=$(curl -s --request POST --url https://cognizant-ai.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
+export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.karlmutch.com/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": Ap9ss2345f"", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
+export AUTH0_TOKEN=$(curl -s --request POST --url https://karlmutch.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
 
 </b>
 c.f. https://auth0.com/docs/quickstart/backend/golang/02-using#obtaining-an-access-token-for-testing.
@@ -1160,11 +1035,11 @@ cd cmd/downstream
 go run . --ip-port=":30008" &
 cd ../..
 cd cmd/experimentsrv
-export AUTH0_DOMAIN=cognizant-ai.auth0.com
+export AUTH0_DOMAIN=karlmutch.auth0.com
 export AUTH0_CLIENT_ID=pL3iSUmOB7EPiXae4gPfuEasccV7PATs
 export AUTH0_CLIENT_SECRET=KHSCFuFumudWGKISCYD79ZkwF2YFCiQYurhjik0x6OKYyOb7TkfGKJrHKXXADzqG
-export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.cognizant-ai.net/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
-export AUTH0_TOKEN=$(curl -s --request POST --url https://cognizant-ai.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
+export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.karlmutch.com/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
+export AUTH0_TOKEN=$(curl -s --request POST --url https://karlmutch.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
 go test -v --dbaddr=localhost:5432 -ip-port="[::]:30007" -dbname=platform -downstream="[::]:30008"
 </b></code></pre>
 
@@ -1174,7 +1049,7 @@ Auth0 can be configured to include additional headers with user metadata such as
 
 <pre><code>
 function (user, context, callback) {
-  context.accessToken["http://cognizant-ai.dev/user"] = user.email;
+  context.accessToken["http://karlmutch.com/user"] = user.email;
   callback(null, user, context);
  }</code></pre>
 
@@ -1188,8 +1063,8 @@ An example client for running a simple ping style test against the cluster is pr
 
 <pre><code><b>
 cd cmd/cli-experiment
-go run . --server-addr=platform-services.cognizant-ai.net:443 --auth0-token="$AUTH0_TOKEN"</b>
-(*dev_cognizant_ai_experiment.CheckResponse)(0xc00003c280)(modules:"downstream" )
+go run . --server-addr=platform-services.karlmutch.com:443 --auth0-token="$AUTH0_TOKEN"</b>
+(*dev_karlmutch_experiment.CheckResponse)(0xc00003c280)(modules:"downstream" )
 </code></pre>
 
 Once valid transactions are being performed you should go back to the section on Honeycomb and configure the relevant fields inside the definitions panel for your Dataset.
@@ -1204,7 +1079,7 @@ The following instructions identify a $INGRESS_HOST value for cases where a Load
 
 Services used within the platform require that not only is the link integrity and security is maintained using mTLS but that an authorization block is also supplied to verify the user requesting a service.  The authorization can be supplied when using the gRPC command line tool using the metadata options.  First we retrieve a token using curl and then make a request against the service, run in this case as a local docker container, as follows:
 
-<pre><code><b>grpc_cli call localhost:30001 dev.cognizant-ai.experiment.Service.Get "id: 'test'" --metadata authorization:"Bearer $AUTH0_TOKEN"
+<pre><code><b>grpc_cli call localhost:30001 dev.karlmutch.experiment.Service.Get "id: 'test'" --metadata authorization:"Bearer $AUTH0_TOKEN"
 </b></code></pre>
 
 The services used within the platform all support reflection when using gRPC.  To examine calls available for a server you should first identify the endpoint through which the gateway is being routed, in this case as part of an Istio cluster on AWS with TLS enabled, for example:
@@ -1214,11 +1089,11 @@ export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o 
 export CLUSTER_INGRESS=$INGRESS_HOST:$SECURE_INGRESS_PORT
 <b>grpc_cli ls $CLUSTER_INGRESS -l --channel_creds_type=ssl</b>
 filename: experimentsrv.proto
-package: dev.cognizant_ai.experiment;
+package: dev.karlmutch.experiment;
 service Service {
-  rpc Create(dev.cognizant_ai.experiment.CreateRequest) returns (dev.cognizant_ai.experiment.CreateResponse) {}
-  rpc Get(dev.cognizant_ai.experiment.GetRequest) returns (dev.cognizant_ai.experiment.GetResponse) {}
-  rpc MeshCheck(dev.cognizant_ai.experiment.CheckRequest) returns (dev.cognizant_ai.experiment.CheckResponse) {}
+  rpc Create(dev.karlmutch.experiment.CreateRequest) returns (dev.karlmutch.experiment.CreateResponse) {}
+  rpc Get(dev.karlmutch.experiment.GetRequest) returns (dev.karlmutch.experiment.GetResponse) {}
+  rpc MeshCheck(dev.karlmutch.experiment.CheckRequest) returns (dev.karlmutch.experiment.CheckResponse) {}
 }
 
 filename: grpc/health/v1/health.proto
@@ -1238,26 +1113,26 @@ service ServerReflection {
 
 In circumstances where you have the CN name validation enabled then the host name should reflect the common name for the host, for example:
 
-<pre><code><b>grpc_cli call platform-services.cognizant-ai.net:$SECURE_INGRESS_PORT dev.cognizant-ai.experiment.Service.Get "id: 'test'" --metadata authorization:"Bearer $AUTH0_TOKEN" --channel_creds_type=ssl
+<pre><code><b>grpc_cli call platform-services.karlmutch.com:$SECURE_INGRESS_PORT dev.karlmutch.experiment.Service.Get "id: 'test'" --metadata authorization:"Bearer $AUTH0_TOKEN" --channel_creds_type=ssl
 </b></code></pre>
 
 
 To drill further into interfaces and examine the types being used within calls you can perform commands such as:
 
-<pre><code><b>grpc_cli type $CLUSTER_INGRESS dev.cognizant_ai.experiment.CreateRequest -l --channel_creds_type=ssl</b>
+<pre><code><b>grpc_cli type $CLUSTER_INGRESS dev.karlmutch.experiment.CreateRequest -l --channel_creds_type=ssl</b>
 message CreateRequest {
-.dev.cognizant_ai.experiment.Experiment experiment = 1[json_name = "experiment"];
+.dev.karlmutch.experiment.Experiment experiment = 1[json_name = "experiment"];
 }
-<b>grpc_cli type $CLUSTER_INGRESS dev.cognizant_ai.experiment.Experiment -l --channel_creds_type=ssl</b>
+<b>grpc_cli type $CLUSTER_INGRESS dev.karlmutch.experiment.Experiment -l --channel_creds_type=ssl</b>
 message Experiment {
 string uid = 1[json_name = "uid"];
 string name = 2[json_name = "name"];
 string description = 3[json_name = "description"];
 .google.protobuf.Timestamp created = 4[json_name = "created"];
-map&lt;uint32, .dev.cognizant_ai.experiment.InputLayer&gt; inputLayers = 5[json_name = "inputLayers"];
-map&lt;uint32, .dev.cognizant_ai.experiment.OutputLayer&gt; outputLayers = 6[json_name = "outputLayers"];
+map&lt;uint32, .dev.karlmutch.experiment.InputLayer&gt; inputLayers = 5[json_name = "inputLayers"];
+map&lt;uint32, .dev.karlmutch.experiment.OutputLayer&gt; outputLayers = 6[json_name = "outputLayers"];
 }
-<b>grpc_cli type $CLUSTER_INGRESS dev.cognizant_ai.experiment.InputLayer -l --channel_creds_type=ssl</b>
+<b>grpc_cli type $CLUSTER_INGRESS dev.karlmutch.experiment.InputLayer -l --channel_creds_type=ssl</b>
 message InputLayer {
 enum Type {
 	Unknown = 0;
@@ -1266,7 +1141,7 @@ enum Type {
 	Raw = 3;
 }
 string name = 1[json_name = "name"];
-.dev.cognizant_ai.experiment.InputLayer.Type type = 2[json_name = "type"];
+.dev.karlmutch.experiment.InputLayer.Type type = 2[json_name = "type"];
 repeated string values = 3[json_name = "values"];
 }
 </code></pre>

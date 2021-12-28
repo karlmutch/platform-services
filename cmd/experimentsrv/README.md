@@ -126,7 +126,7 @@ To deploy the experiment service three commands will be used stencil (a SDLC awa
 
 When version controlled containers are being used with ECS or another docker registry the semver, and stencil tools can be used to extract a git cloned repository that has the version string embeeded inside the README.md or another file of your choice, and then use this with your application deployment yaml specification, as follows:
 
-<pre><code><b>cd ~/project/src/github.com/leaf-ai/platform-services/cmd/experimentsrv</b>
+<pre><code><b>cd ~/project/src/github.com/karlmutch/platform-services/cmd/experimentsrv</b>
 <b>kubectl apply -f <(istioctl kube-inject -f <(stencil < experimentsrv.yaml 2>/dev/null))
 </b></code></pre>
 
@@ -134,21 +134,21 @@ This technique can be used to upgrade software versions etc and performing rolli
 
 ## Service Authentication
 
-Service authentication is introduced inside the top level README.md file for the github.com/leaf-ai/platform-services repository, along with instructions for adding applications and users.  All calls into the experiment service must contain metadata for the autorization brearer token and have the all:experiments claim in order to be accepted.
+Service authentication is introduced inside the top level README.md file for the github.com/karlmutch/platform-services repository, along with instructions for adding applications and users.  All calls into the experiment service must contain metadata for the autorization brearer token and have the all:experiments claim in order to be accepted.
 
-<pre><code><b>export AUTH0_DOMAIN=cognizant-ai.auth0.com
-export AUTH0_DOMAIN=cognizant-ai.auth0.com
+<pre><code><b>export AUTH0_DOMAIN=karlmutch.auth0.com
+export AUTH0_DOMAIN=karlmutch.auth0.com
 export AUTH0_CLIENT_ID=71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj
 export AUTH0_CLIENT_SECRET=AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms
-export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.cognizant-ai.dev/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
-export AUTH0_TOKEN=$(curl -s --request POST --url https://cognizant-ai.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
+export AUTH0_REQUEST=$(printf '{"client_id": "%s", "client_secret": "%s", "audience":"http://api.karlmutch.com/experimentsrv","grant_type":"password", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' "$AUTH0_CLIENT_ID" "$AUTH0_CLIENT_SECRET")
+export AUTH0_TOKEN=$(curl -s --request POST --url https://karlmutch.auth0.com/oauth/token --header 'content-type: application/json' --data "$AUTH0_REQUEST" | jq -r '"\(.access_token)"')
 </b></code></pre>
 
 # Using the service
 
 In order to use the service the gateway should be determined.  The Istio instruction for determining the host and port under various circumstances can be found at https://istio.io/docs/tasks/traffic-management/ingress/#determining-the-ingress-ip-and-ports, and in the following subsections.
 
-If you are using a microk8s based solution the following commands will work:
+If you are using a rancher desktop based solution the following commands will work:
 
 <pre><code><b>export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
@@ -164,11 +164,11 @@ export INGRESS_HOST=$(kubectl -n istio-system get service istio-ingressgateway -
 export CLUSTER_INGRESS=$INGRESS_HOST:$INGRESS_PORT
 </b></code></pre>
 
-If you choose to make use of LetsEncrypt and are using the, platform-services.cognizant-ai.net domain, as an example you will want to do the following:
+If you choose to make use of LetsEncrypt and are using the, platform-services.karlmutch.com domain, as an example you will want to do the following:
 
 <pre><code><b>
 export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].port}')
-export INGRESS_HOST=platform-services.cognizant-ai.net
+export INGRESS_HOST=platform-services.karlmutch.com
 export CLUSTER_INGRESS=$INGRESS_HOST:$SECURE_INGRESS_PORT
 </b></code></pre>
 
@@ -184,31 +184,31 @@ Two pieces of information are needed in order to make use of the service:
 
 First, you will need the gateway endpoint for your cluster.  The following command sets an environment variable that you will be using as the CLUSTER_INGRESS environment variable across all of the examples within this guide.
 
-<pre><code><b>grpc_cli call $CLUSTER_INGRESS dev.cognizant_ai.experiment.Service.Create "experiment: {uid: 't', name: 'name', description: 'description'}"  --metadata authorization:"Bearer $AUTH0_TOKEN" --channel_creds_type=ssl</b>
+<pre><code><b>grpc_cli call $CLUSTER_INGRESS dev.karlmutch.experiment.Service.Create "experiment: {uid: 't', name: 'name', description: 'description'}"  --metadata authorization:"Bearer $AUTH0_TOKEN" --channel_creds_type=ssl</b>
 </pre></code>
 
 # Manually exercising the server from within the mesh
 
-<pre><code><b>grpc_cli ls $CLUSTER_INGRESS dev.cognizant_ai.experiment.Service -l</b>
+<pre><code><b>grpc_cli ls $CLUSTER_INGRESS dev.karlmutch.experiment.Service -l</b>
 
 filename: experimentsrv.proto
-package: dev.cognizant_ai.experiment;
+package: dev.karlmutch.experiment;
 service Service {
-  rpc Create(dev.cognizant_ai.experiment.CreateRequest) returns (dev.cognizant_ai.experiment.CreateResponse) {}
-  rpc Get(dev.cognizant_ai.experiment.GetRequest) returns (dev.cognizant_ai.experiment.GetResponse) {}
-  rpc MeshCheck(dev.cognizant_ai.experiment.CheckRequest) returns (dev.cognizant_ai.experiment.CheckResponse) {}
+  rpc Create(dev.karlmutch.experiment.CreateRequest) returns (dev.karlmutch.experiment.CreateResponse) {}
+  rpc Get(dev.karlmutch.experiment.GetRequest) returns (dev.karlmutch.experiment.GetResponse) {}
+  rpc MeshCheck(dev.karlmutch.experiment.CheckRequest) returns (dev.karlmutch.experiment.CheckResponse) {}
 }
 </code></pre>
 
-<pre><code><b>export AUTH0_DOMAIN=cognizant-ai.auth0.com
-export AUTH0_TOKEN=$(curl -s --request POST --url 'https://cognizant-ai.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.cognizant-ai.dev/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
-/tmp/grpc_cli call $CLUSTER_INGRESS dev.cognizant_ai.experiment.Service.Get "uid: ''" --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
+<pre><code><b>export AUTH0_DOMAIN=karlmutch.auth0.com
+export AUTH0_TOKEN=$(curl -s --request POST --url 'https://karlmutch.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.karlmutch.com/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
+/tmp/grpc_cli call $CLUSTER_INGRESS dev.karlmutch.experiment.Service.Get "uid: ''" --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
 connecting to localhost:30001
 Sending client initial metadata:
 authorization : ...
 Rpc failed with status code 2, error message: selecting an experiment requires either the DB id or the experiment unique id to be specified stack="[db.go:533 server.go:42 experimentsrv.pb.go:375 auth.go:88 experimentsrv.pb.go:377 server.go:900 server.go:1122 server.go:617]"
 
-<b>/tmp/grpc_cli call $CLUSTER_INGRESS dev.cognizant_ai.experiment.Service.Get "uid: 't'" --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
+<b>/tmp/grpc_cli call $CLUSTER_INGRESS dev.karlmutch.experiment.Service.Get "uid: 't'" --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
 connecting to localhost:30001
 Sending client initial metadata:
 authorization : ...
@@ -221,11 +221,11 @@ If you wish to exercise the server while it is deployed into an Istio orchestrat
 <b>kubectl cp `which grpc_cli` experiments-v1-bc46b5d68-bcdkv:/tmp/grpc_cli -c istio-proxy
 kubectl exec -it experiments-v1-bc46b5d68-bcdkv -c istio-proxy /bin/bash
 sudo apt-get update
-sudo apt-get install -y libgflags2v5 ca-certificates jq
-export AUTH0_TOKEN=$(curl -s --request POST --url 'https://cognizant-ai.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client
-_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.cognizant-ai.dev/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:
+sudo apt-get install -y ca-certificates jq
+export AUTH0_TOKEN=$(curl -s --request POST --url 'https://karlmutch.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client
+_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.karlmutch.com/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:
 experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
-/tmp/grpc_cli call 100.96.1.14:30001 dev.cognizant_ai.experiment.Service.Get "uid: 't'"  --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
+/tmp/grpc_cli call 100.96.1.14:30001 dev.karlmutch.experiment.Service.Get "uid: 't'"  --metadata authorization:"Bearer $AUTH0_TOKEN"</b>
 </code></pre>
 
 When Istio is used without a Load balancer the IP of the host on which the pod is running can be determined by using the following command:
@@ -273,8 +273,8 @@ Options:
 In order to contact a remote service deployed on AWS using the Kubernetes based service mesh you should be familar with the instructions within the grpc\_cli description that detail the use of metadata to pass authorization tokens to the service.  The authorization header can be specified using the --header option as follows:
 
 <pre><code><b>
-export AUTH0_DOMAIN=cognizant-ai.auth0.com
-export AUTH0_TOKEN=$(curl -s --request POST --url 'https://cognizant-ai.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.cognizant-ai.dev/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
+export AUTH0_DOMAIN=karlmutch.auth0.com
+export AUTH0_TOKEN=$(curl -s --request POST --url 'https://karlmutch.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.karlmutch.com/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
 export AUTH0_HEADER="Bearer $AUTH0_TOKEN"
 export CLUSTER_INGRESS_HOST=`kubectl get ingress -o wide | tail -1 | awk '{print $3}'`
 export CLUSTER_INGRESS_PORT=`kubectl get ingress -o wide | tail -1 | awk '{print $4}'`
@@ -290,8 +290,8 @@ The grpc listener is configured so that both an IPv4 and IPv6 adapter is attempe
 The server provides some testing for the DB and core functionality of the server.  In order to run this you can use the go test command and point at the relevant go package directories from which you wish to run the tests, for example to run the experiment DB and server tests you could use commands like the following:
 
 <pre><code><b>cd cmd/experimentsrv
-export AUTH0_DOMAIN=cognizant-ai.auth0.com
-export AUTH0_TOKEN=$(curl -s --request POST --url 'https://cognizant-ai.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.cognizant-ai.dev/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
+export AUTH0_DOMAIN=karlmutch.auth0.com
+export AUTH0_TOKEN=$(curl -s --request POST --url 'https://karlmutch.auth0.com/oauth/token' --header 'content-type: application/json' --data '{ "client_id":"71eLNu9Bw1rgfYz9PA2gZ4Ji7ujm3Uwj", "client_secret": "AifXD19Y1EKhAKoSqI5r9NWCdJJfyN0x-OywIumSd9hqq_QJr-XlbC7b65rwMjms", "audience": "http://api.karlmutch.com/experimentsrv", "grant_type": "http://auth0.com/oauth/grant-type/password-realm", "username": "karlmutch@gmail.com", "password": "Passw0rd!", "scope": "all:experiments", "realm": "Username-Password-Authentication" }' | jq -r '"\(.access_token)"')
 LOGXI=*=TRC PGUSER=pl PGHOST=dev-platform.cluster-cff2uhtd2jzh.us-west-2.rds.amazonaws.com PGDATABASE=platform go test -v . -ip-port ":30001"
 </b></code></pre>
 

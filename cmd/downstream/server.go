@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 
-	downstream "github.com/leaf-ai/platform-services/internal/gen/downstream"
+	downstream "github.com/karlmutch/platform-services/internal/gen/downstream"
 )
 
 var (

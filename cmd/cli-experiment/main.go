@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/leaf-ai/platform-services/internal/platform"
+	"github.com/karlmutch/platform-services/internal/platform"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-stack/stack"
@@ -22,7 +22,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/oauth"
 
-	experimentsrv "github.com/leaf-ai/platform-services/internal/gen/experimentsrv"
+	experimentsrv "github.com/karlmutch/platform-services/internal/gen/experimentsrv"
 )
 
 var (

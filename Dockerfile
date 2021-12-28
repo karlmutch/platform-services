@@ -1,25 +1,18 @@
-# Docker multi stage build formatted file.  This is used to build then prepare
-# containers for the services that this repository uses
-#
-FROM golang:1.16.3
+FROM golang:1.17.5
 
 MAINTAINER karlmutch@gmail.com
-
-LABEL vendor="Cognizant Technologies" \
-      dev.cognizant-ai.version=0.0.0 \
-      dev.cognizant-ai.module=platform-services
 
 ENV LANG C.UTF-8
 
 RUN apt-get -y update
 
-RUN apt-get -y install git software-properties-common wget openssl ssh curl jq apt-utils unzip python-pip && \
+RUN apt-get -y install git software-properties-common wget openssl ssh curl jq apt-utils unzip python3-pip && \
     apt-get clean && \
     apt-get autoremove && \
     pip install awscli --upgrade
 
 # Protobuf version
-ENV PROTOBUF_VERSION="3.15.7"
+ENV PROTOBUF_VERSION="3.19.1"
 ENV PROTOBUF_ZIP=protoc-${PROTOBUF_VERSION}-linux-x86_64.zip
 ENV PROTOBUF_URL=https://github.com/google/protobuf/releases/download/v${PROTOBUF_VERSION}/${PROTOBUF_ZIP}
 
@@ -42,8 +35,22 @@ RUN wget ${PROTOBUF_URL} && \
 USER ${USER}
 WORKDIR /home/${USER}
 
-ENV GOPATH=/project
 VOLUME /project
-WORKDIR /project/src/github.com/leaf-ai/platform-services
+WORKDIR /project/src/github.com/karlmutch/platform-services
+
+ENV GOPATH=/project
+ENV PATH="${GOPATH}/bin:/home/${USER}/bin:${PATH}:/usr/bin"
+
+RUN \
+    mkdir -p /home/${USER}/bin && \
+    GOBIN=/home/${USER}/bin go install --mod=readonly google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1 && \
+    GOBIN=/home/${USER}/bin go install --mod=readonly google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0 && \
+    GOBIN=/home/${USER}/bin go install --mod=readonly github.com/go-swagger/go-swagger/cmd/swagger@v0.28.0 && \
+    GOBIN=/home/${USER}/bin go install github.com/github-release/github-release@v0.10.0
+
+
+RUN \
+    GOBIN=/home/${USER}/bin go install --mod=readonly github.com/karlmutch/duat/cmd/semver@0.16.0 && \
+    GOBIN=/home/${USER}/bin go install --mod=readonly github.com/karlmutch/duat/cmd/stencil@0.16.0
 
 CMD /bin/bash -C ./all-build.sh
