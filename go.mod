@@ -8,7 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
-	github.com/go-chi/chi/v5 v5.0.1
+	github.com/go-chi/chi/v5 v5.0.7
 	github.com/go-chi/docgen v1.2.0
 	github.com/go-chi/render v1.0.1
 	github.com/go-openapi/errors v0.20.0
@@ -22,7 +22,7 @@ require (
 	github.com/go-test/deep v1.0.8
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/golang/protobuf v1.5.2
-	github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/honeycombio/opencensus-exporter v1.0.1
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jmoiron/sqlx v1.3.4
