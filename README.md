@@ -949,6 +949,11 @@ And then the logs can be captured during the testing using the following:
 <pre><code><b>
 kubectl logs $(kubectl get pods -l app=experiment -o jsonpath='{.items[0].metadata.name}') -c istio-proxy</b></code></pre>
 
+A good way to diagnose resource consumption issues is to make use of ktop.
+
+<pre><code><b>
+go install github.com/vladimirvivien/ktop@latesta</b></code></pre>
+
 # Logging and Observability
 
 Currently the service mesh is deployed with Observability tools.  These instruction do not go into Observability at this time.  However we do address logging.
