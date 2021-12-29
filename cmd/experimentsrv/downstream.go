@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -47,7 +47,7 @@ func (server *lastSeen) recentlySeen() (recent bool) {
 	return server.when.After(time.Now().Add(-15 * time.Second))
 }
 
-func (server *lastSeen) checkDownstream(ctx context.Context, tracer *zipkin.Tracer) (err errors.Error) {
+func (server *lastSeen) checkDownstream(ctx context.Context, tracer *zipkin.Tracer) (err kv.Error) {
 
 	span, ctx := tracer.StartSpanFromContext(ctx, "checkDownstream")
 	defer span.Finish()
@@ -62,14 +62,14 @@ func (server *lastSeen) checkDownstream(ctx context.Context, tracer *zipkin.Trac
 	// Internal connections are protected using the mTLS features of the Istio side-car
 	conn, errGo := grpc.Dial(hostAndPort, grpc.WithInsecure())
 	if errGo != nil {
-		return errors.Wrap(errGo).With("address", hostAndPort).With("stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("address", hostAndPort).With("stack", stack.Trace().TrimRuntime())
 	}
 	defer conn.Close()
 
 	client := downstream.NewDownstreamClient(conn)
 
 	if _, errGo = client.Ping(ctx, &downstream.PingRequest{}); errGo != nil {
-		return errors.Wrap(errGo).With("address", hostAndPort).With("stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("address", hostAndPort).With("stack", stack.Trace().TrimRuntime())
 	}
 	server.Lock()
 	server.when = time.Now()
@@ -77,7 +77,7 @@ func (server *lastSeen) checkDownstream(ctx context.Context, tracer *zipkin.Trac
 	return nil
 }
 
-func initiateDownstream(ctx context.Context, tracer *zipkin.Tracer, hostAndPort string, refresh time.Duration) (err errors.Error) {
+func initiateDownstream(ctx context.Context, tracer *zipkin.Tracer, hostAndPort string, refresh time.Duration) (err kv.Error) {
 	seen.Lock()
 	seen.hostAndPort = hostAndPort
 	seen.Unlock()

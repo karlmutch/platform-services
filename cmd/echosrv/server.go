@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/health"
@@ -39,12 +39,12 @@ func (es *echoServer) Check(ctx context.Context, in *grpc_health_v1.HealthCheckR
 }
 
 func (*echoServer) Watch(in *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) (err error) {
-	return errors.New(grpc_health_v1.HealthCheckResponse_UNKNOWN.String())
+	return kv.NewError(grpc_health_v1.HealthCheckResponse_UNKNOWN.String())
 }
 
-func runServer(ctx context.Context, serviceName string, port int) (errC chan errors.Error) {
+func runServer(ctx context.Context, serviceName string, port int) (errC chan kv.Error) {
 
-	errC = make(chan errors.Error, 3)
+	errC = make(chan kv.Error, 3)
 
 	server := grpc.NewServer()
 	echoSrv := &echoServer{health: health.NewServer()}
@@ -56,7 +56,7 @@ func runServer(ctx context.Context, serviceName string, port int) (errC chan err
 
 	netListen, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
 	if err != nil {
-		errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime())
+		errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime())
 		return
 	}
 
@@ -65,7 +65,7 @@ func runServer(ctx context.Context, serviceName string, port int) (errC chan err
 
 		// serve API
 		if err := server.Serve(netListen); err != nil {
-			errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime())
+			errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime())
 		}
 		echoSrv.health.SetServingStatus(serviceName, grpc_health_v1.HealthCheckResponse_NOT_SERVING)
 		func() {

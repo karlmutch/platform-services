@@ -49,7 +49,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 const ExpectedDBVersion int64 = 1
@@ -67,25 +67,25 @@ var (
 	// will respect this flag and fail out any calls until the circuit breaker
 	//
 	dbDownErr = DBErr{
-		err: errors.New("DB initialization not yet started"),
+		err: kv.NewError("DB initialization not yet started"),
 	}
 
 	dBase *sqlx.DB
 )
 
 type DBErr struct {
-	err errors.Error
+	err kv.Error
 	sync.Mutex
 }
 
-func (err *DBErr) set(errIn errors.Error) {
+func (err *DBErr) set(errIn kv.Error) {
 	err.Lock()
 	defer err.Unlock()
 
 	err.err = errIn
 }
 
-func (err *DBErr) get() (errOut errors.Error) {
+func (err *DBErr) get() (errOut kv.Error) {
 	err.Lock()
 	defer err.Unlock()
 	return err.err
@@ -152,7 +152,7 @@ func dbHasCorrectVersion(expect int64) (err error, ok bool, actual int64) {
 //
 func CloseDB() error {
 
-	dbDownErr.set(errors.New("database has been closed intentionally").With("stack", stack.Trace().TrimRuntime()))
+	dbDownErr.set(kv.NewError("database has been closed intentionally").With("stack", stack.Trace().TrimRuntime()))
 
 	return dBase.Close()
 }
@@ -160,11 +160,11 @@ func CloseDB() error {
 // getPassFromPGPass matches the very first line that can be matched from the postgres password file as documented
 // by https://www.postgresql.org/docs/9.5/static/libpq-pgpass.html
 //
-func getPassFromPGPass(passFile string, host string, port string, db string, user string) (pass string, err errors.Error) {
+func getPassFromPGPass(passFile string, host string, port string, db string, user string) (pass string, err kv.Error) {
 
 	file, errGo := os.Open(passFile)
 	if errGo != nil {
-		return pass, errors.Wrap(errGo).With("passfile", passFile).With("stack", stack.Trace().TrimRuntime())
+		return pass, kv.Wrap(errGo).With("passfile", passFile).With("stack", stack.Trace().TrimRuntime())
 	}
 	defer file.Close()
 
@@ -206,7 +206,7 @@ func getPassFromPGPass(passFile string, host string, port string, db string, use
 	}
 
 	if errGo = scanner.Err(); errGo != nil {
-		return pass, errors.Wrap(errGo, "pass file parsing failed").With("passfile", passFile).With("stack", stack.Trace().TrimRuntime())
+		return pass, kv.Wrap(errGo, "pass file parsing failed").With("passfile", passFile).With("stack", stack.Trace().TrimRuntime())
 	}
 
 	// Password was not found inside the pgpas file
@@ -215,14 +215,14 @@ func getPassFromPGPass(passFile string, host string, port string, db string, use
 
 type DBErrorMsg struct {
 	Fatal bool
-	Err   errors.Error
+	Err   kv.Error
 }
 
 // StartDB is used to open and then attempt to test the connection to the
 // database, which contains state information for components of the platform
 // ecosystem
 //
-func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, err errors.Error) {
+func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, err kv.Error) {
 
 	msgC = make(chan string)
 	errorC = make(chan *DBErrorMsg)
@@ -238,7 +238,7 @@ func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, er
 	// On the first time the master is started the DB is left in a down state and is initialized
 	// during the normal life cycle of the server.
 	//
-	dbDownErr.set(errors.New("database start not yet completed").With("stack", stack.Trace().TrimRuntime()))
+	dbDownErr.set(kv.NewError("database start not yet completed").With("stack", stack.Trace().TrimRuntime()))
 
 	// Start a runtime monitor for DB connections held open, a liveness check
 	// and a circuit breaker
@@ -265,12 +265,12 @@ func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, er
 				dbRecovery := dbDownErr.get() != nil
 				if errGo := dBase.Ping(); errGo != nil {
 
-					dbDownErr.set(errors.Wrap(errGo))
+					dbDownErr.set(kv.Wrap(errGo))
 
 					msg := fmt.Sprint("database ", *databaseHostPort, " ", *databaseName, " is currently down")
 					err := &DBErrorMsg{
 						Fatal: false,
-						Err:   errors.Wrap(errGo, msg).With("dbHostPort", *databaseHostPort).With("dbName", *databaseName).With("stack", stack.Trace().TrimRuntime()),
+						Err:   kv.Wrap(errGo, msg).With("dbHostPort", *databaseHostPort).With("dbName", *databaseName).With("stack", stack.Trace().TrimRuntime()),
 					}
 					select {
 					case errorC <- err:
@@ -293,7 +293,7 @@ func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, er
 						msg := fmt.Sprint("db has the wrong version ", ExpectedDBVersion, " expected got version ", version, " instead")
 						errMsg := &DBErrorMsg{
 							Fatal: true,
-							Err:   errors.New(msg).With("stack", stack.Trace().TrimRuntime()).With("dbExpectedVersion", ExpectedDBVersion).With("dbVersion", version),
+							Err:   kv.NewError(msg).With("stack", stack.Trace().TrimRuntime()).With("dbExpectedVersion", ExpectedDBVersion).With("dbVersion", version),
 						}
 						select {
 						case errorC <- errMsg:
@@ -306,7 +306,7 @@ func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, er
 						msg := "DB has no version marker, suspect or incorrect database schema"
 						errMsg := &DBErrorMsg{
 							Fatal: true,
-							Err:   errors.Wrap(err, msg).With("stack", stack.Trace().TrimRuntime()).With("dbExpectedVersion", ExpectedDBVersion).With("dbVersion", version),
+							Err:   kv.Wrap(err, msg).With("stack", stack.Trace().TrimRuntime()).With("dbExpectedVersion", ExpectedDBVersion).With("dbVersion", version),
 						}
 						select {
 						case errorC <- errMsg:
@@ -345,14 +345,14 @@ func StartDB(ctx context.Context) (msgC chan string, errorC chan *DBErrorMsg, er
 // will return an error value of nil if the DB is running for a useful error for why
 // it might not be running
 //
-func GetDBStatus() (err errors.Error) {
+func GetDBStatus() (err kv.Error) {
 	return dbDownErr.get()
 }
 
 // initDB will setup the database configuration but does not actually create a live connection
 // or validate the parameters supplied to it.
 //
-func initDB(url string, user string) (err errors.Error) {
+func initDB(url string, user string) (err kv.Error) {
 
 	pgPassFile := os.Getenv("PGPASSFILE")
 	if len(pgPassFile) == 0 {
@@ -385,7 +385,7 @@ func initDB(url string, user string) (err errors.Error) {
 
 	db, errGo := sql.Open("postgres", datasetName)
 	if errGo != nil {
-		return errors.Wrap(errGo).With("dbConnectString", safeDatasetName).With("stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("dbConnectString", safeDatasetName).With("stack", stack.Trace().TrimRuntime())
 	}
 
 	db.SetMaxOpenConns(*databaseMaxConn)
@@ -425,14 +425,14 @@ func initDB(url string, user string) (err errors.Error) {
 // set by the operational side of the system.  Its output is generally intended for engineering
 // and thrid level support personnel
 //
-func DBShowAllTrace() (output []string, err errors.Error) {
+func DBShowAllTrace() (output []string, err kv.Error) {
 
 	output = []string{}
 
 	rows, errGo := dBase.Queryx("show all")
 
 	if errGo != nil {
-		return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
+		return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
 	}
 	defer rows.Close()
 
@@ -445,7 +445,7 @@ func DBShowAllTrace() (output []string, err errors.Error) {
 	for rows.Next() {
 		aRow := &DBSetting{}
 		if errGo = rows.StructScan(aRow); errGo != nil {
-			return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
+			return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
 		}
 		msg := fmt.Sprintf("%s='%s' %s", aRow.Name, aRow.Setting, aRow.Description)
 		output = append(output, fmt.Sprint("DB Setting ", msg))
@@ -539,7 +539,7 @@ func CheckIfFatal(inErr error) (err error) {
 //
 // This function will NOT return layer information.
 //
-func SelectExperiment(ctx context.Context, rowId uint64, uid string) (result *grpc.Experiment, err errors.Error) {
+func SelectExperiment(ctx context.Context, rowId uint64, uid string) (result *grpc.Experiment, err kv.Error) {
 
 	ctx, span := trace.StartSpan(ctx, "SelectExperiment", trace.WithSpanKind(trace.SpanKindServer))
 	defer func() {
@@ -567,13 +567,13 @@ func SelectExperiment(ctx context.Context, rowId uint64, uid string) (result *gr
 		if len(uid) > 0 {
 			query = query.Where(sq.And{sq.NotEq{"state": "Deactivated"}, sq.Eq{"uid": uid}})
 		} else {
-			return nil, errors.New("selecting an experiment requires either the DB rowId or the experiment unique id to be specified").With("stack", stack.Trace().TrimRuntime())
+			return nil, kv.NewError("selecting an experiment requires either the DB rowId or the experiment unique id to be specified").With("stack", stack.Trace().TrimRuntime())
 		}
 	}
 
 	sql, args, errGo := query.ToSql()
 	if CheckIfFatal(errGo) != nil {
-		return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
+		return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
 	}
 
 	result = &grpc.Experiment{}
@@ -582,11 +582,11 @@ func SelectExperiment(ctx context.Context, rowId uint64, uid string) (result *gr
 	row := dBase.QueryRow(sql, args...)
 	errGo = row.Scan(&result.Uid, &result.Name, &result.Description, &createTime)
 	if CheckIfFatal(errGo) != nil {
-		return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
+		return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
 	}
 	tstamp, errGo := ptypes.TimestampProto(createTime)
 	if errGo != nil {
-		return nil, errors.Wrap(errGo, "could not parse timestamp from DB").With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
+		return nil, kv.Wrap(errGo, "could not parse timestamp from DB").With("stack", stack.Trace().TrimRuntime()).With("rowId", rowId).With("uid", uid)
 	}
 	result.Created = tstamp
 
@@ -620,7 +620,7 @@ type experimentWide struct {
 //
 // For a single experiment this function will return one row for every layer that was found.
 //
-func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experiment, err errors.Error) {
+func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experiment, err kv.Error) {
 
 	ctx, span := trace.StartSpan(ctx, "SelectExperimentWide", trace.WithSpanKind(trace.SpanKindServer))
 	defer func() {
@@ -642,12 +642,12 @@ func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experim
 	experiments AS e INNER JOIN layers AS l ON e.uid = $1 AND l.uid = e.uid AND e.state != 'Deactivated';`
 
 	if len(uid) == 0 {
-		return nil, errors.New("selecting an experiment requires the experiment unique id to be specified").With("stack", stack.Trace().TrimRuntime())
+		return nil, kv.NewError("selecting an experiment requires the experiment unique id to be specified").With("stack", stack.Trace().TrimRuntime())
 	}
 
 	rows, errGo := dBase.Queryx(sql, uid)
 	if CheckIfFatal(errGo) != nil {
-		return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+		return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 	}
 	defer rows.Close()
 	rowCount := 0
@@ -658,12 +658,12 @@ func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experim
 		rowCount++
 		row := experimentWide{}
 		if errGo = rows.StructScan(&row); CheckIfFatal(errGo) != nil {
-			return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+			return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 		}
 		if result == nil {
 			tstamp, errGo := ptypes.TimestampProto(row.Created)
 			if errGo != nil {
-				return nil, errors.Wrap(errGo, "could not parse timestamp from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+				return nil, kv.Wrap(errGo, "could not parse timestamp from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 			}
 
 			result = &grpc.Experiment{
@@ -685,7 +685,7 @@ func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experim
 
 			inputType, isValid := grpc.InputLayer_Type_value[row.LayerType]
 			if !isValid {
-				return nil, errors.Wrap(errGo, "could not parse input layer type from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid).With("layer", row.LayerNumber)
+				return nil, kv.Wrap(errGo, "could not parse input layer type from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid).With("layer", row.LayerNumber)
 			}
 			input.Type = (grpc.InputLayer_Type)(inputType)
 			result.InputLayers[row.LayerNumber] = input
@@ -699,7 +699,7 @@ func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experim
 
 			outputType, isValid := grpc.OutputLayer_Type_value[row.LayerType]
 			if !isValid {
-				return nil, errors.Wrap(errGo, "could not parse output layer type from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid).With("layer", row.LayerNumber)
+				return nil, kv.Wrap(errGo, "could not parse output layer type from DB").With("stack", stack.Trace().TrimRuntime()).With("uid", uid).With("layer", row.LayerNumber)
 			}
 			output.Type = (grpc.OutputLayer_Type)(outputType)
 			result.OutputLayers[row.LayerNumber] = output
@@ -728,7 +728,7 @@ func SelectExperimentWide(ctx context.Context, uid string) (result *grpc.Experim
 // result of assumptions made by the caller.
 //
 //
-func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.Experiment, err errors.Error) {
+func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.Experiment, err kv.Error) {
 	ctx, span := trace.StartSpan(ctx, "InsertExperiment", trace.WithSpanKind(trace.SpanKindServer))
 	defer func() {
 		if err != nil {
@@ -745,7 +745,7 @@ func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.
 	}
 
 	if len(data.Uid) == 0 {
-		return nil, errors.New("an insert operation must have the experiment uid field set").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+		return nil, kv.NewError("an insert operation must have the experiment uid field set").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 	}
 
 	result = proto.Clone(data).(*grpc.Experiment)
@@ -764,7 +764,7 @@ func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.
 	errGo := query.QueryRow().Scan(&created)
 	if CheckIfFatal(errGo) != nil {
 		tx.Rollback()
-		return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+		return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 	}
 
 	for i, layer := range data.InputLayers {
@@ -776,7 +776,7 @@ func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.
 
 		if CheckIfFatal(errGo) != nil {
 			tx.Rollback()
-			return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+			return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 		}
 	}
 
@@ -789,18 +789,18 @@ func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.
 
 		if CheckIfFatal(errGo) != nil {
 			tx.Rollback()
-			return nil, errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+			return nil, kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 		}
 	}
 
 	errGo = tx.Commit()
 	if errGo != nil {
-		return nil, errors.Wrap(errGo, "database insert transaction failed").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+		return nil, kv.Wrap(errGo, "database insert transaction failed").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 	}
 
 	result.Created, errGo = ptypes.TimestampProto(created)
 	if errGo != nil {
-		return nil, errors.Wrap(errGo, "timestamp from database insert could not be parsed").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
+		return nil, kv.Wrap(errGo, "timestamp from database insert could not be parsed").With("stack", stack.Trace().TrimRuntime()).With("uid", data.Uid)
 	}
 
 	return result, nil
@@ -809,7 +809,7 @@ func InsertExperiment(ctx context.Context, data *grpc.Experiment) (result *grpc.
 // DeactivateExperiment is used to conceal experiments from future operations unless special flags are set.
 // It is used where otherwise the experiment would be delete but we need to retain a record of it having existed.
 //
-func DeactivateExperiment(ctx context.Context, uid string) (err errors.Error) {
+func DeactivateExperiment(ctx context.Context, uid string) (err kv.Error) {
 
 	ctx, span := trace.StartSpan(ctx, "DeactivateExperiment", trace.WithSpanKind(trace.SpanKindServer))
 	defer func() {
@@ -827,7 +827,7 @@ func DeactivateExperiment(ctx context.Context, uid string) (err errors.Error) {
 	}
 
 	if len(uid) == 0 {
-		return errors.New("a deactivate operation must have the experiment uid field set").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+		return kv.NewError("a deactivate operation must have the experiment uid field set").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 	}
 
 	result, errGo := sq.Update("experiments").
@@ -837,10 +837,10 @@ func DeactivateExperiment(ctx context.Context, uid string) (err errors.Error) {
 		PlaceholderFormat(sq.Dollar).
 		Exec()
 	if CheckIfFatal(errGo) != nil {
-		return errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+		return kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 	}
 	if len, _ := result.RowsAffected(); len == 0 {
-		return errors.New("specified experiment was not found").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
+		return kv.NewError("specified experiment was not found").With("stack", stack.Trace().TrimRuntime()).With("uid", uid)
 	}
 	return nil
 }
@@ -848,7 +848,7 @@ func DeactivateExperiment(ctx context.Context, uid string) (err errors.Error) {
 // SaveLog is used to insert a logging record either originating from the master,
 // or from a client into the logging table
 //
-func SaveLog(log *Log) (err errors.Error) {
+func SaveLog(log *Log) (err kv.Error) {
 
 	if err = dbDownErr.get(); err != nil {
 		return err
@@ -866,7 +866,7 @@ func SaveLog(log *Log) (err errors.Error) {
 		PlaceholderFormat(sq.Dollar)
 
 	if _, errGo := insert.Exec(); CheckIfFatal(errGo) != nil {
-		return errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
 	}
 	return nil
 }

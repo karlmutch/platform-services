@@ -5,11 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 func TestInfo(t *testing.T) {
-	r, _ := Router([]errors.Error{})
+	r, _ := Router([]kv.Error{})
 
 	ts := httptest.NewServer(r)
 	defer ts.Close()

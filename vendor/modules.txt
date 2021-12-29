@@ -122,8 +122,6 @@ github.com/honeycombio/opencensus-exporter/honeycomb
 # github.com/jessevdk/go-flags v1.5.0
 ## explicit; go 1.15
 github.com/jessevdk/go-flags
-# github.com/jjeffery/errors v1.0.3
-## explicit
 # github.com/jjeffery/kv v0.8.1
 ## explicit
 github.com/jjeffery/kv
@@ -140,9 +138,6 @@ github.com/josharian/intern
 # github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9
 ## explicit
 github.com/karlmutch/envflag
-# github.com/karlmutch/errors v1.0.2
-## explicit
-github.com/karlmutch/errors
 # github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820
 ## explicit; go 1.16
 github.com/karlmutch/logxi/v1

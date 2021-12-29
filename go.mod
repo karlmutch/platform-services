@@ -25,9 +25,9 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/honeycombio/opencensus-exporter v1.0.1
 	github.com/jessevdk/go-flags v1.5.0
+	github.com/jjeffery/kv v0.8.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9
-	github.com/karlmutch/errors v1.0.2
 	github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820
 	github.com/lib/pq v1.10.4
 	github.com/openzipkin/zipkin-go v0.3.0
@@ -53,8 +53,6 @@ require (
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/honeycombio/libhoney-go v1.10.0 // indirect
-	github.com/jjeffery/errors v1.0.3 // indirect
-	github.com/jjeffery/kv v0.8.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect

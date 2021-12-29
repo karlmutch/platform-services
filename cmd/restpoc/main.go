@@ -17,7 +17,7 @@ import (
 	"github.com/karlmutch/envflag"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 const serviceName = "restpoc"
@@ -120,11 +120,11 @@ func Main() {
 // doneC is used by the EntryPoint function to indicate when it has terminated
 // its processing
 //
-func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) {
+func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []kv.Error) {
 
 	defer close(doneC)
 
-	errs = []errors.Error{}
+	errs = []kv.Error{}
 
 	// Supplying the context allows the client to pubsub to cancel the
 	// blocking receive inside the run
@@ -142,7 +142,7 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 		case <-quitC:
 			return
 		case <-stopC:
-			logger.Warn(errors.New("CTRL-C interrupted").With("stack", stack.Trace().TrimRuntime()).Error())
+			logger.Warn(kv.NewError("CTRL-C interrupted").With("stack", stack.Trace().TrimRuntime()).Error())
 			close(quitC)
 			return
 		}
@@ -175,7 +175,7 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Warn(errors.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
+			logger.Warn(kv.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
 		}
 		close(quitC)
 	}()

@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-stack/stack"
 	"github.com/honeycombio/opencensus-exporter/honeycomb"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"go.opencensus.io/trace"
 )
 
-func StartOpenCensus(ctx context.Context, apiKey string, dataset string) (err errors.Error) {
+func StartOpenCensus(ctx context.Context, apiKey string, dataset string) (err kv.Error) {
 
 	if len(apiKey) != 0 {
 		exporter := honeycomb.NewExporter(apiKey, dataset)
@@ -30,5 +30,5 @@ func StartOpenCensus(ctx context.Context, apiKey string, dataset string) (err er
 		return nil
 	}
 
-	return errors.New("apiKey is missing, please supply a value for this parameter").With("stack", stack.Trace().TrimRuntime())
+	return kv.NewError("apiKey is missing, please supply a value for this parameter").With("stack", stack.Trace().TrimRuntime())
 }

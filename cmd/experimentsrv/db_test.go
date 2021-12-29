@@ -19,7 +19,7 @@ import (
 	"github.com/karlmutch/platform-services/internal/platform"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 func TestDBA(t *testing.T) {
@@ -28,13 +28,13 @@ func TestDBA(t *testing.T) {
 	giveUp := time.Now().Add(timeout)
 	msg := fmt.Sprintf("first attempt failed, retrying the DB connection for %v", timeout)
 
-	err := errors.New("")
+	err := kv.NewError("")
 	for {
 		select {
 		case <-time.After(time.Second):
 			if err = model.GetDBStatus(); err != nil {
 				if time.Now().After(giveUp) {
-					t.Error(errors.Wrap(err).With("stack", stack.Trace().TrimRuntime()))
+					t.Error(kv.Wrap(err).With("stack", stack.Trace().TrimRuntime()))
 					return
 				}
 				if len(msg) != 0 {
@@ -81,7 +81,7 @@ func newTestExperiment() (out *grpc.Experiment) {
 func TestDBExperimentSimple(t *testing.T) {
 
 	if err := model.GetDBStatus(); err != nil {
-		t.Error(errors.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
+		t.Error(kv.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
 		return
 	}
 
@@ -98,7 +98,7 @@ func TestDBExperimentSimple(t *testing.T) {
 	// do the deep comparison
 	in.Created = exp.Created
 	if diff := diffExp(in, exp); len(diff) != 0 {
-		t.Error(errors.New(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
+		t.Error(kv.NewError(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
 		return
 	}
 
@@ -108,11 +108,11 @@ func TestDBExperimentSimple(t *testing.T) {
 		return
 	}
 	if selected == nil {
-		t.Error(errors.New("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
+		t.Error(kv.NewError("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
 		return
 	}
 	if diff := diffExp(in, selected); len(diff) != 0 {
-		t.Error(errors.New(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
+		t.Error(kv.NewError(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
 		return
 	}
 
@@ -123,11 +123,11 @@ func TestDBExperimentSimple(t *testing.T) {
 		return
 	}
 	if wide == nil {
-		t.Error(errors.New("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
+		t.Error(kv.NewError("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
 		return
 	}
 	if diff := diffExp(in, wide); len(diff) != 0 {
-		t.Error(errors.New(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
+		t.Error(kv.NewError(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
 		return
 	}
 
@@ -146,7 +146,7 @@ func TestDBExperimentSimple(t *testing.T) {
 func TestDBExperimentWide(t *testing.T) {
 
 	if err := model.GetDBStatus(); err != nil {
-		t.Error(errors.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
+		t.Error(kv.Wrap(err).With("stack", stack.Trace().TrimRuntime()).Error())
 		return
 	}
 
@@ -183,7 +183,7 @@ func TestDBExperimentWide(t *testing.T) {
 	// do the deep comparison
 	in.Created = exp.Created
 	if diff := diffExp(in, exp); len(diff) != 0 {
-		t.Error(errors.New(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
+		t.Error(kv.NewError(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
 		return
 	}
 
@@ -194,11 +194,11 @@ func TestDBExperimentWide(t *testing.T) {
 		return
 	}
 	if wide == nil {
-		t.Error(errors.New("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
+		t.Error(kv.NewError("SelectExperimentWide returned no data unexpectedly").With("uid", in.Uid).Error())
 		return
 	}
 	if diff := diffExp(in, wide); len(diff) != 0 {
-		t.Error(errors.New(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
+		t.Error(kv.NewError(strings.Join(diff, ", ")).With("stack", stack.Trace().TrimRuntime()))
 		return
 	}
 

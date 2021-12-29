@@ -339,8 +339,6 @@ github.com/jcmturner/gokrb5/v8 v8.4.2/go.mod h1:sb+Xq/fTY5yktf/VxLsE3wlfPqQjp0aW
 github.com/jcmturner/rpc/v2 v2.0.3/go.mod h1:VUJYCIDm3PVOEHw8sgt091/20OJjskO/YJki3ELg/Hc=
 github.com/jessevdk/go-flags v1.5.0 h1:1jKYvbxEjfUl0fmqTCOfonvskHHXMjBySTLW4y9LFvc=
 github.com/jessevdk/go-flags v1.5.0/go.mod h1:Fw0T6WPc1dYxT4mKEZRfG5kJhaTDP9pj1c2EWnYs/m4=
-github.com/jjeffery/errors v1.0.3 h1:oM8cLCCNP8ccKKpn7tbii4AW5hqZsr2pvEXxvwVoBUs=
-github.com/jjeffery/errors v1.0.3/go.mod h1:K2Ea6XpV2ki89b7/nPp5DVHqMuTvcbv6q95/XkzvXx8=
 github.com/jjeffery/kv v0.8.1 h1:S4/KbfPVNTGM/YCt5F+Za93o09119VNtOT+rLL4Gls0=
 github.com/jjeffery/kv v0.8.1/go.mod h1:iHA3uy+umBqxcJFr+e+gaGAv1OcyHlU6rSo3TcR61yQ=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
@@ -354,8 +352,6 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9 h1:8woJcp3LvepwYgcflpLf6UfE8kZqC/BIywDWPMXEv6g=
 github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9/go.mod h1:HCSJtRcU+YI1lWzCbrzb+9uAbwuAjGQ+g73Xznrnm/4=
-github.com/karlmutch/errors v1.0.2 h1:emFb7hZmHFFXlj1FP1wWDYO+GzXvr51aPgrwd7MwZfU=
-github.com/karlmutch/errors v1.0.2/go.mod h1:cG3hggpcEefk7G0qvnv7OIrA40NBLbKLDQMxByIltK8=
 github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820 h1:yQgmCKDCzICIkYZA247nV2BWcSMbqPQc6jHPniMf2Dk=
 github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820/go.mod h1:yozMr5Xgvq7CItSgWRdqerl3tUYunVr0WsvXJrOhSdc=
 github.com/karrick/godirwalk v1.8.0/go.mod h1:H5KPZjojv4lE+QYImBI8xVtrBRgYrIVsaRPx4tDPEn4=

@@ -14,7 +14,7 @@ import (
 	"net/http"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"github.com/karlmutch/platform-services/internal/platform"
 
@@ -95,7 +95,7 @@ func initJwksUpdate(ctx context.Context) {
 	}()
 }
 
-func validateToken(token string, audience []string, claimCheck string) (err errors.Error) {
+func validateToken(token string, audience []string, claimCheck string) (err kv.Error) {
 
 	claims := map[string]interface{}{}
 	cache.Lock()
@@ -111,7 +111,7 @@ func validateToken(token string, audience []string, claimCheck string) (err erro
 			// ID provider
 			expires := time.Unix(int64(platform.Round(exp.(float64))), 0)
 			if expires.Before(time.Now().UTC()) {
-				return errors.New("token has expired").With("stack", stack.Trace().TrimRuntime())
+				return kv.NewError("token has expired").With("stack", stack.Trace().TrimRuntime())
 			}
 			logger.Debug("cache hit")
 			return nil
@@ -128,13 +128,13 @@ func validateToken(token string, audience []string, claimCheck string) (err erro
 
 	headerTokenRequest, errGo := http.NewRequest("", audience[0], nil)
 	if errGo != nil {
-		return errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("hint", "possibly the Bearer label is missing")
+		return kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).With("hint", "possibly the Bearer label is missing")
 	}
 	headerTokenRequest.Header.Add("Authorization", token)
 
 	validResp, errGo := validator.ValidateRequest(headerTokenRequest)
 	if errGo != nil {
-		return errors.Wrap(errGo).With("token", "..."+token[len(token)-6:], "stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("token", "..."+token[len(token)-6:], "stack", stack.Trace().TrimRuntime())
 	}
 
 	if len(claimCheck) == 0 {
@@ -143,7 +143,7 @@ func validateToken(token string, audience []string, claimCheck string) (err erro
 
 	errGo = validator.Claims(headerTokenRequest, validResp, &claims)
 	if errGo != nil {
-		return errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
+		return kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())
 	}
 
 	// Get ready to cache things, RFC 7519 nbf, exp, iat are also validated by the provider so
@@ -152,21 +152,21 @@ func validateToken(token string, audience []string, claimCheck string) (err erro
 
 	exp, isExpPresent := claims["exp"]
 	if !isExpPresent {
-		return errors.New("token did not contain an expiry").With("stack", stack.Trace().TrimRuntime())
+		return kv.NewError("token did not contain an expiry").With("stack", stack.Trace().TrimRuntime())
 	}
 	expires := time.Unix(int64(platform.Round(exp.(float64))), 0)
 	if expires.Before(time.Now().UTC()) {
-		return errors.New("token has expired").With("stack", stack.Trace().TrimRuntime())
+		return kv.NewError("token has expired").With("stack", stack.Trace().TrimRuntime())
 	}
 	cache.Lock()
 	cache.lru.Add(token, claims)
 	cache.Unlock()
 
 	if _, isPresent := claims["scope"]; !isPresent {
-		return errors.New(fmt.Sprintf("the authenticated user has no roles for this API, specifically the '%s' scope is missing", claimCheck)).With("stack", stack.Trace().TrimRuntime())
+		return kv.NewError(fmt.Sprintf("the authenticated user has no roles for this API, specifically the '%s' scope is missing", claimCheck)).With("stack", stack.Trace().TrimRuntime())
 	}
 	if !strings.Contains(claims["scope"].(string), claimCheck) {
-		return errors.New(fmt.Sprintf("the authenticated user does not have the appropriate '%s' scope", claimCheck)).With("stack", stack.Trace().TrimRuntime())
+		return kv.NewError(fmt.Sprintf("the authenticated user does not have the appropriate '%s' scope", claimCheck)).With("stack", stack.Trace().TrimRuntime())
 	}
 	return nil
 }

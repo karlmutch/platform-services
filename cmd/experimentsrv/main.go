@@ -77,7 +77,7 @@ import (
 	"github.com/karlmutch/envflag"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"github.com/karlmutch/platform-services/internal/experiment"
 )
@@ -193,7 +193,7 @@ func Main() {
 // doneC is used by the EntryPoint function to indicate when it has terminated
 // its processing
 //
-func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) {
+func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []kv.Error) {
 
 	defer func() {
 		defer func() {
@@ -202,7 +202,7 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 		close(doneC)
 	}()
 
-	errs = []errors.Error{}
+	errs = []kv.Error{}
 
 	// Supplying the context allows the client to pubsub to cancel the
 	// blocking receive inside the run
@@ -220,7 +220,7 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 		case <-quitC:
 			return
 		case <-stopC:
-			logger.Warn(errors.New("CTRL-C interrupted").With("stack", stack.Trace().TrimRuntime()).Error())
+			logger.Warn(kv.NewError("CTRL-C interrupted").With("stack", stack.Trace().TrimRuntime()).Error())
 			close(quitC)
 			return
 		}
@@ -273,7 +273,7 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 
 	endpoint, errGo := zipkin.NewEndpoint("experiment", "localhost:0")
 	if errGo != nil {
-		logger.Warn(errors.Wrap(errGo).With("address", "localhost:0").With("stack", stack.Trace().TrimRuntime()).Error())
+		logger.Warn(kv.Wrap(errGo).With("address", "localhost:0").With("stack", stack.Trace().TrimRuntime()).Error())
 	}
 
 	tracer, errGo := zipkin.NewTracer(reporter,
@@ -281,13 +281,13 @@ func EntryPoint(quitC chan struct{}, doneC chan struct{}) (errs []errors.Error) 
 		zipkin.WithSharedSpans(false),
 		zipkin.WithLocalEndpoint(endpoint))
 	if errGo != nil {
-		logger.Warn(errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).Error())
+		logger.Warn(kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).Error())
 	}
 
 	// Initiate a regular checker that looks to the example downstream gRPC service
 	// and validates that it is working
 	if err = initiateDownstream(ctx, tracer, *downstreamHostPort, time.Duration(30*time.Minute)); err != nil {
-		logger.Warn(errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).Error())
+		logger.Warn(kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime()).Error())
 	}
 
 	// Now check for any fatal errors before allowing the system to continue.  This allows

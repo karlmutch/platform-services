@@ -16,14 +16,14 @@ import (
 	"github.com/karlmutch/platform-services/cmd/restpoc/health"
 	"github.com/karlmutch/platform-services/cmd/restpoc/info"
 
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 var (
 	routes = flag.Bool("routes", false, "Generate router documentation")
 )
 
-func Router(errI []errors.Error) (r chi.Router, errO []errors.Error) {
+func Router(errI []kv.Error) (r chi.Router, errO []kv.Error) {
 
 	r = chi.NewRouter()
 

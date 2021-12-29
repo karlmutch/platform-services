@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"github.com/golang/protobuf/ptypes"
 
@@ -46,14 +46,14 @@ func (*DownstreamServer) Check(ctx context.Context, in *grpc_health_v1.HealthChe
 }
 
 func (*DownstreamServer) Watch(in *grpc_health_v1.HealthCheckRequest, server grpc_health_v1.Health_WatchServer) (err error) {
-	return errors.New(grpc_health_v1.HealthCheckResponse_UNKNOWN.String())
+	return kv.NewError(grpc_health_v1.HealthCheckResponse_UNKNOWN.String())
 }
 
-func runServer(ctx context.Context, serviceName string, ipPort string) (errC chan errors.Error) {
+func runServer(ctx context.Context, serviceName string, ipPort string) (errC chan kv.Error) {
 
 	{
 		if addrs, errGo := net.InterfaceAddrs(); errGo != nil {
-			logger.Warn(fmt.Sprint(errors.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())))
+			logger.Warn(fmt.Sprint(kv.Wrap(errGo).With("stack", stack.Trace().TrimRuntime())))
 		} else {
 			for _, addr := range addrs {
 				logger.Debug("", "network", addr.Network(), "addr", addr.String())
@@ -72,7 +72,7 @@ func runServer(ctx context.Context, serviceName string, ipPort string) (errC cha
 	modules.SetModule(serverModule, false)
 	defer modules.SetModule(serverModule, true)
 
-	errC = make(chan errors.Error, 3)
+	errC = make(chan kv.Error, 3)
 
 	server := grpc.NewServer()
 	handler := &DownstreamServer{}
@@ -89,13 +89,13 @@ func runServer(ctx context.Context, serviceName string, ipPort string) (errC cha
 		// Check for strip off the port number which MUST be present, if found not to be present fail out
 		ipPort := strings.Split(addr, ":")
 		if len(ipPort) == 1 {
-			errC <- errors.New("user specified address did not have a port (xx:NNN)").With("stack", stack.Trace().TrimRuntime()).With("ip-port", ipPort)
+			errC <- kv.NewError("user specified address did not have a port (xx:NNN)").With("stack", stack.Trace().TrimRuntime()).With("ip-port", ipPort)
 			return
 		}
 		// Look for the port as the last token
 		ip := strings.Join(ipPort[:len(ipPort)-1], ":")
 		//if err := net.ParseIP(ip); err == nil {
-		//		errC <- errors.New("user specified address did not contain a valid IP (XXX:nn)").With("stack", stack.Trace().TrimRuntime()).With("ip-port", ip)
+		//		errC <- kv.NewError("user specified address did not contain a valid IP (XXX:nn)").With("stack", stack.Trace().TrimRuntime()).With("ip-port", ip)
 		//		return
 		//	}
 		proto := "tcp4"
@@ -104,7 +104,7 @@ func runServer(ctx context.Context, serviceName string, ipPort string) (errC cha
 		}
 		netListen, err := net.Listen(proto, addr)
 		if err != nil {
-			errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime()).With("ip-port", addr)
+			errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime()).With("ip-port", addr)
 			return
 		}
 		listeners = append(listeners, netListen)
@@ -118,7 +118,7 @@ func runServer(ctx context.Context, serviceName string, ipPort string) (errC cha
 			modules.SetModule(module, true)
 
 			if err := server.Serve(netListen); err != nil {
-				errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime())
+				errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime())
 			}
 			modules.SetModule(module, false)
 			func() {

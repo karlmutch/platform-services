@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
@@ -19,14 +19,14 @@ import (
 	"github.com/karlmutch/platform-services/internal/gen/restapi/operations"
 )
 
-func runServer(ctx context.Context, port int) (errC chan errors.Error) {
+func runServer(ctx context.Context, port int) (errC chan kv.Error) {
 
-	errC = make(chan errors.Error, 3)
+	errC = make(chan kv.Error, 3)
 
 	// load embedded swagger file
 	swaggerSpec, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
-		errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime())
+		errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime())
 		return
 	}
 
@@ -62,7 +62,7 @@ func runServer(ctx context.Context, port int) (errC chan errors.Error) {
 	go func() {
 		// serve API
 		if err := server.Serve(); err != nil {
-			errC <- errors.Wrap(err).With("stack", stack.Trace().TrimRuntime())
+			errC <- kv.Wrap(err).With("stack", stack.Trace().TrimRuntime())
 		}
 		server.Shutdown()
 		func() {

@@ -10,15 +10,15 @@ import (
 	"net"
 
 	"github.com/go-stack/stack"
-	"github.com/karlmutch/errors"
+	"github.com/jjeffery/kv"
 )
 
 const hexDigit = "0123456789abcdef"
 
-func GetMacAddrWithoutDelimiters() (macAddr string, err errors.Error) {
+func GetMacAddrWithoutDelimiters() (macAddr string, err kv.Error) {
 	interfaces, errGo := net.Interfaces()
 	if errGo != nil {
-		return "", errors.Wrap(errGo, "machine could not be queried for network interfaces").With("stack", stack.Trace().TrimRuntime())
+		return "", kv.Wrap(errGo, "machine could not be queried for network interfaces").With("stack", stack.Trace().TrimRuntime())
 	}
 	for _, anInterface := range interfaces {
 		if 0 != anInterface.Flags&net.FlagLoopback {
@@ -35,7 +35,7 @@ func GetMacAddrWithoutDelimiters() (macAddr string, err errors.Error) {
 			return string(buffer), nil
 		}
 	}
-	return "", errors.Wrap(errGo, "no MAC address could be found on the available network interfaces").With("stack", stack.Trace().TrimRuntime())
+	return "", kv.Wrap(errGo, "no MAC address could be found on the available network interfaces").With("stack", stack.Trace().TrimRuntime())
 }
 
 // GetComponentUniqueID produces a non RFC 4122 UUID that is tied to the MAC address if
