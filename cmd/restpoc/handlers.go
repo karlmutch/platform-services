@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/render"
 
@@ -28,11 +28,11 @@ func Router(errI []errors.Error) (r chi.Router, errO []errors.Error) {
 	r = chi.NewRouter()
 
 	// A good base middleware stack
-	r.Use(middleware.RequestID)       // Injects a request ID into the context of each request
-	r.Use(middleware.DefaultCompress) // Gzip compression for clients that accept compressed responses
-	r.Use(middleware.RealIP)          // Sets a http.Request's RemoteAddr to either X-Forwarded-For or X-Real-IP
-	r.Use(middleware.Logger)          // Logs the start and end of each request with the elapsed processing time
-	r.Use(middleware.Recoverer)       // Gracefully absorb panics and prints the stack trace
+	r.Use(middleware.RequestID)   // Injects a request ID into the context of each request
+	r.Use(middleware.Compress(5)) // Gzip compression for clients that accept compressed responses
+	r.Use(middleware.RealIP)      // Sets a http.Request's RemoteAddr to either X-Forwarded-For or X-Real-IP
+	r.Use(middleware.Logger)      // Logs the start and end of each request with the elapsed processing time
+	r.Use(middleware.Recoverer)   // Gracefully absorb panics and prints the stack trace
 
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 

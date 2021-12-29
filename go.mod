@@ -3,13 +3,13 @@ module github.com/karlmutch/platform-services
 go 1.17
 
 require (
-	github.com/Masterminds/squirrel v1.1.0
+	github.com/Masterminds/squirrel v1.5.2
 	github.com/auth0-community/go-auth0 v1.0.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
-	github.com/go-chi/chi v4.0.2+incompatible
-	github.com/go-chi/docgen v1.0.5
+	github.com/go-chi/chi/v5 v5.0.1
+	github.com/go-chi/docgen v1.2.0
 	github.com/go-chi/render v1.0.1
 	github.com/go-openapi/errors v0.20.0
 	github.com/go-openapi/loads v0.20.2
@@ -19,24 +19,24 @@ require (
 	github.com/go-openapi/swag v0.19.15
 	github.com/go-openapi/validate v0.20.2
 	github.com/go-stack/stack v1.8.1
-	github.com/go-test/deep v1.0.7
-	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e
+	github.com/go-test/deep v1.0.8
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190118093823-f849b5445de4
 	github.com/honeycombio/opencensus-exporter v1.0.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/jmoiron/sqlx v1.2.0
+	github.com/jmoiron/sqlx v1.3.4
 	github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9
-	github.com/karlmutch/errors v0.0.0-20170122013909-ea57f1276151
-	github.com/karlmutch/logxi v0.0.0-20211221194646-1295647a0665
-	github.com/lib/pq v1.9.0
-	github.com/openzipkin/zipkin-go v0.2.2
-	go.opencensus.io v0.22.4
+	github.com/karlmutch/errors v1.0.2
+	github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820
+	github.com/lib/pq v1.10.4
+	github.com/openzipkin/zipkin-go v0.3.0
+	go.opencensus.io v0.23.0
 	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
-	golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558
+	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
-	gopkg.in/square/go-jose.v2 v2.5.1
+	gopkg.in/square/go-jose.v2 v2.6.0
 )
 
 require (
@@ -48,12 +48,10 @@ require (
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/facebookgo/limitgroup v0.0.0-20150612190941-6abd8d71ec01 // indirect
 	github.com/facebookgo/muster v0.0.0-20150708232844-fd3d7953fd52 // indirect
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-openapi/analysis v0.20.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/honeycombio/libhoney-go v1.10.0 // indirect
 	github.com/jjeffery/errors v1.0.3 // indirect
 	github.com/jjeffery/kv v0.8.1 // indirect
@@ -66,8 +64,6 @@ require (
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
-	github.com/onsi/ginkgo v1.12.1 // indirect
-	github.com/onsi/gomega v1.10.3 // indirect
 	go.mongodb.org/mongo-driver v1.5.1 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
