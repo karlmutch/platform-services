@@ -49,7 +49,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 const ExpectedDBVersion int64 = 1

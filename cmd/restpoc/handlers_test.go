@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 func TestInfo(t *testing.T) {

@@ -25,10 +25,10 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/honeycombio/opencensus-exporter v1.0.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/jjeffery/kv v0.8.1
 	github.com/jmoiron/sqlx v1.3.4
-	github.com/karlmutch/envflag v0.0.0-20210224011628-e09410f046e9
-	github.com/karlmutch/logxi v0.0.0-20211221213451-90fc4c9dd820
+	github.com/karlmutch/envflag v0.0.0-20211229205350-9dc3b5cc21e3
+	github.com/karlmutch/kv v0.7.1-0.20211230193629-78efee49143e
+	github.com/karlmutch/logxi v0.0.0-20211230183642-c324f015c3e6
 	github.com/lib/pq v1.10.4
 	github.com/openzipkin/zipkin-go v0.3.0
 	go.opencensus.io v0.23.0

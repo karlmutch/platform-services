@@ -19,7 +19,7 @@ import (
 	"github.com/karlmutch/platform-services/internal/platform"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 func TestDBA(t *testing.T) {

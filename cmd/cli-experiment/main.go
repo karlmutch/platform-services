@@ -14,7 +14,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"

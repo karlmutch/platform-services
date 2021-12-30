@@ -16,7 +16,7 @@ import (
 	"github.com/karlmutch/platform-services/cmd/restpoc/health"
 	"github.com/karlmutch/platform-services/cmd/restpoc/info"
 
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 var (

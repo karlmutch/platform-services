@@ -11,7 +11,7 @@ import (
 	"net"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 type Exclusive struct {

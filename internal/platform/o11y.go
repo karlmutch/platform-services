@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-stack/stack"
 	"github.com/honeycombio/opencensus-exporter/honeycomb"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 
 	"go.opencensus.io/trace"
 )

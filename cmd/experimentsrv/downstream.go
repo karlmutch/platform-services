@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

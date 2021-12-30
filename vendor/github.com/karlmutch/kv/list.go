@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jjeffery/kv/internal/logfmt"
-	"github.com/jjeffery/kv/internal/parse"
-	"github.com/jjeffery/kv/internal/pool"
+	"github.com/karlmutch/kv/internal/logfmt"
+	"github.com/karlmutch/kv/internal/parse"
+	"github.com/karlmutch/kv/internal/pool"
 )
 
 // List is a slice of alternating keys and values.

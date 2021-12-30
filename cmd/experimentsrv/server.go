@@ -21,7 +21,7 @@ import (
 	zipkingrpc "github.com/openzipkin/zipkin-go/middleware/grpc"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 
 	model "github.com/karlmutch/platform-services/internal/experiment"
 	experiment "github.com/karlmutch/platform-services/internal/gen/experimentsrv"

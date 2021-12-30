@@ -10,7 +10,7 @@ import (
 	"net"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 const hexDigit = "0123456789abcdef"

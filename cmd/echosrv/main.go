@@ -61,7 +61,7 @@ import (
 	"github.com/karlmutch/envflag"
 
 	"github.com/go-stack/stack"
-	"github.com/jjeffery/kv"
+	"github.com/karlmutch/kv"
 )
 
 const serviceName = "echosrv"
