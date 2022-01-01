@@ -1,4 +1,4 @@
-# cloud.google.com/go v0.65.0
+# cloud.google.com/go v0.81.0
 ## explicit; go 1.11
 cloud.google.com/go/compute/metadata
 # github.com/Masterminds/squirrel v1.5.2
@@ -37,6 +37,8 @@ github.com/facebookgo/limitgroup
 # github.com/facebookgo/muster v0.0.0-20150708232844-fd3d7953fd52
 ## explicit
 github.com/facebookgo/muster
+# github.com/fsnotify/fsnotify v1.5.1
+## explicit; go 1.13
 # github.com/go-chi/chi/v5 v5.0.7
 ## explicit; go 1.14
 github.com/go-chi/chi/v5
