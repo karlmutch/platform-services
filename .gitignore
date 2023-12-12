@@ -24,3 +24,5 @@ minica
 .envrc
 spdx-output
 bom.xml
+
+.DS_store
